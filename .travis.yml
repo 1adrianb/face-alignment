@@ -6,7 +6,6 @@ python:
 addons:
   apt_packages:
     - gfortran
-    - g++-5
 
 notifications:
   email: false

@@ -1,2 +1,4 @@
 opencv-python
 dlib>=19.5.0
+scipy>=0.17.0
+scikit-image
