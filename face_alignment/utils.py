@@ -43,12 +43,12 @@ def draw_gaussian(image, point, sigma):
         return image
     size = 6 * sigma + 1
     g = _gaussian(size)
-    g_x = [max(1, -ul[0]), min(br[0], image.shape[1]) -
-           max(1, ul[0]) + max(1, -ul[0])]
-    g_y = [max(1, -ul[1]), min(br[1], image.shape[0]) -
-           max(1, ul[1]) + max(1, -ul[1])]
-    img_x = [max(1, ul[0]), min(br[0], image.shape[1])]
-    img_y = [max(1, ul[1]), min(br[1], image.shape[0])]
+    g_x = [int(max(1, -ul[0])), int(min(br[0], image.shape[1])) -
+           int(max(1, ul[0])) + int(max(1, -ul[0]))]
+    g_y = [int(max(1, -ul[1])), int(min(br[1]), image.shape[0]) -
+           int(max(1, ul[1])) + int(max(1, -ul[1]))]
+    img_x = [int(max(1, ul[0])), int(min(br[0], image.shape[1]))]
+    img_y = [int(max(1, ul[1])), int(min(br[1], image.shape[0]))]
     assert (g_x[0] > 0 and g_y[1] > 0)
     image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]
           ] = image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] + g[g_y[0] - 1:g_y[1], g_x[0] - 1:g_x[1]]
@@ -71,7 +71,7 @@ def transform(point, center, scale, resolution, invert=False):
     if invert:
         t = torch.inverse(t)
 
-    new_point = (torch.matmul(t,_pt))[0:2]
+    new_point = (torch.matmul(t, _pt))[0:2]
 
     return new_point.int()
 
@@ -202,7 +202,7 @@ def reporthook(count, block_size, total_size):
     duration = time.time() - start_time
     progress_size = int(count * block_size)
     speed = int(progress_size / (1024 * duration))
-    percent = min(int(count * blockSize * 100 / totalSize), 100)
+    percent = min(int(count * block_size * 100 / total_size), 100)
     sys.stdout.write("\r...%d%%, %d MB, %d KB/s, %d seconds passed" %
                      (percent, progress_size / (1024 * 1024), speed, duration))
     sys.stdout.flush()
