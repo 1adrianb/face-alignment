@@ -58,6 +58,10 @@ class FaceAlignment:
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
+        
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
+
         if enable_cudnn and self.enable_cuda:
             torch.backends.cudnn.benchmark = True
 
@@ -66,14 +70,11 @@ class FaceAlignment:
             path_to_detector = os.path.join(
                 base_path, "mmod_human_face_detector.dat")
             if not os.path.isfile(path_to_detector):
-                if not os.path.exists(base_path):
-                    os.makedirs(base_path)
                 print("Downloading the face detection CNN. Please wait...")
 
                 request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat",
-                    os.path.join(path_to_detector),
-                    reporthook)
+                    os.path.join(path_to_detector))
 
             self.face_detector = dlib.cnn_face_detection_model_v1(
                 path_to_detector)
@@ -94,8 +95,7 @@ class FaceAlignment:
 
             request_file.urlretrieve(
                 "https://www.adrianbulat.com/downloads/python-fan/" +
-                network_name, os.path.join(fan_path),
-                reporthook)
+                network_name, os.path.join(fan_path))
 
         fan_weights = torch.load(
             fan_path,
@@ -120,8 +120,7 @@ class FaceAlignment:
 
                 request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/python-fan/depth.pth.tar",
-                    os.path.join(depth_model_path),
-                    reporthook)
+                    os.path.join(depth_model_path))
 
             depth_weights = torch.load(
                 depth_model_path,

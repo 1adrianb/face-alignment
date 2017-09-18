@@ -45,7 +45,7 @@ def draw_gaussian(image, point, sigma):
     g = _gaussian(size)
     g_x = [int(max(1, -ul[0])), int(min(br[0], image.shape[1])) -
            int(max(1, ul[0])) + int(max(1, -ul[0]))]
-    g_y = [int(max(1, -ul[1])), int(min(br[1]), image.shape[0]) -
+    g_y = [int(max(1, -ul[1])), int(min(br[1], image.shape[0])) -
            int(max(1, ul[1])) + int(max(1, -ul[1]))]
     img_x = [int(max(1, ul[0])), int(min(br[0], image.shape[1]))]
     img_y = [int(max(1, ul[1])), int(min(br[1], image.shape[0]))]
@@ -192,20 +192,6 @@ def appdata_dir(appname=None, roaming=False):
 
     # Done
     return path
-
-
-def reporthook(count, block_size, total_size):
-    global start_time
-    if count == 0:
-        start_time = time.time()
-        return
-    duration = time.time() - start_time
-    progress_size = int(count * block_size)
-    speed = int(progress_size / (1024 * duration))
-    percent = min(int(count * block_size * 100 / total_size), 100)
-    sys.stdout.write("\r...%d%%, %d MB, %d KB/s, %d seconds passed" %
-                     (percent, progress_size / (1024 * 1024), speed, duration))
-    sys.stdout.flush()
 
 
 def shuffle_lr(parts, pairs=None):
