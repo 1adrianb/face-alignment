@@ -10,7 +10,7 @@ Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning 
 
 For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg)](https://travis-ci.com/1adrianb/face-alignment)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?token=1tkX6BdqVznnFwPrJhqK&branch=master)](https://travis-ci.com/1adrianb/face-alignment)
 
 ## Features
 
