@@ -19,9 +19,9 @@ class LandmarksType(Enum):
 
 
 class NetworkSize(Enum):
-    #TINY = 1
-    #SMALL = 2
-    #MEDIUM = 3
+    # TINY = 1
+    # SMALL = 2
+    # MEDIUM = 3
     LARGE = 4
 
     def __new__(cls, value):
@@ -41,7 +41,8 @@ class FaceAlignment:
         network_size (``NetworkSize`` object): an enum defining the size of the network (for the 2D and 2.5D points).
         enable_cuda (bool, optional): If True, all the computations will be done on a CUDA-enabled GPU (recommended).
         enable_cudnn (bool, optional): If True, cudnn library will be used in the benchmark mode
-        flip_input (bool, optional): Increase the network accuracy by doing a second forward passed with the flipped version of the image
+        flip_input (bool, optional): Increase the network accuracy by doing a second forward passed with 
+                                    the flipped version of the image
 
     Example:
         >>> FaceAlignment(NetworkSize.2D, flip_input=False)
@@ -93,10 +94,10 @@ class FaceAlignment:
                 reporthook)
 
         fan_weights = torch.load(fan_path, map_location=lambda storage, loc: storage)
-        fan_dict = {k.replace('module.',''): v for k, v in fan_weights['state_dict'].items()}
+        fan_dict = {k.replace('module.', ''): v for k, v in fan_weights['state_dict'].items()}
 
         self.face_alignemnt_net.load_state_dict(fan_dict)
-        
+
         if self.enable_cuda:
             self.face_alignemnt_net.cuda()
         self.face_alignemnt_net.eval()
@@ -115,7 +116,7 @@ class FaceAlignment:
                     reporthook)
 
             depth_weights = torch.load(depth_model_path, map_location=lambda storage, loc: storage)
-            depth_dict = {k.replace('module.',''): v for k, v in depth_weights['state_dict'].items()}
+            depth_dict = {k.replace('module.', ''): v for k, v in depth_weights['state_dict'].items()}
             self.depth_prediciton_net.load_state_dict(depth_dict)
 
             if self.enable_cuda:
@@ -126,7 +127,8 @@ class FaceAlignment:
         """Run the dlib face detector over an image
 
         Args:
-            image (``ndarray`` object or string): either the path to the image or an image previosly opened on which face detection will be performed.
+            image (``ndarray`` object or string): either the path to the image or an image previosly opened 
+            on which face detection will be performed.
 
         Returns:
             Returns a list of detected faces

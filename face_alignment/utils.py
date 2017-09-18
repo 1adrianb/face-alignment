@@ -46,8 +46,10 @@ def draw_gaussian(image, point, sigma):
     img_x = [max(1, ul[0]), min(br[0], image.shape[1])]
     img_y = [max(1, ul[1]), min(br[1], image.shape[0])]
     assert (g_x[0] > 0 and g_y[1] > 0)
-    image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] = image[img_y[0] -
-                                                                1:img_y[1], img_x[0] - 1:img_x[1]] + g[g_y[0] - 1:g_y[1], g_x[0] - 1:g_x[1]]
+    image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] = image[img_y[0] - 1:img_y[1], 
+                                                                img_x[0] - 1:img_x[1]]
+                                                                 + g[g_y[0] - 1:g_y[1], 
+                                                                 g_x[0] - 1:g_x[1]]
     image[image > 1] = 1
     return image
 
@@ -202,8 +204,10 @@ def reporthook(count, block_size, total_size):
 
 def shuffle_lr(parts, pairs=None):
     if pairs is None:
-        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10], [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45], [
-            37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34], [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
+        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10], 
+        [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45], 
+        [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34], 
+        [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
     for matched_p in pairs:
         idx1, idx2 = matched_p[0], matched_p[1]
         tmp = np.copy(parts[..., idx1])

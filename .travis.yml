@@ -26,6 +26,7 @@ install:
   - source activate test-environment
   - travis_retry pip install --upgrade pip setuptools wheel
   - travis_retry pip install -r requirements.txt
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install enum34; fi
   - python setup.py install
   - pip install --upgrade pytest
 
