@@ -87,7 +87,7 @@ class FaceAlignment:
         if landmarks_type == LandmarksType._2D:
             network_name = '2DFAN-' + str(int(network_size)) + '.pth.tar'
         else:
-            network_name = '2DFAN-' + str(int(network_size)) + '.pth.tar'
+            network_name = '3DFAN-' + str(int(network_size)) + '.pth.tar'
         fan_path = os.path.join(base_path, network_name)
 
         if not os.path.isfile(fan_path):
@@ -167,10 +167,10 @@ class FaceAlignment:
                     d = d.rect
 
                 center = torch.FloatTensor(
-                    [d.right() - (d.right() - d.left()) / 2, d.bottom() -
-                     (d.bottom() - d.top()) / 2])
+                    [d.right() - (d.right() - d.left()) / 2.0, d.bottom() -
+                     (d.bottom() - d.top()) / 2.0])
                 center[1] = center[1] - (d.bottom() - d.top()) * 0.1
-                scale = (d.right() - d.left() + d.bottom() - d.top()) / 200
+                scale = (d.right() - d.left() + d.bottom() - d.top()) / 200.0
 
                 inp = crop(image, center, scale)
                 inp = torch.from_numpy(inp.transpose(
@@ -203,7 +203,7 @@ class FaceAlignment:
                                 (inp, heatmaps), 1), volatile=True)).data.cpu().view(
                         68, 1)
                     pts_img = torch.cat(
-                        (pts_img, depth_pred * (1 / (256 / (200 * scale)))), 1)
+                        (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
 
                 landmarks.append(pts_img.numpy())
         else:

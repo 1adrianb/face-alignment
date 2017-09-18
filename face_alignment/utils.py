@@ -28,7 +28,7 @@ def _gaussian(
     for i in range(height):
         for j in range(width):
             gauss[i][j] = amplitude * math.exp(-(math.pow((j + 1 - center_x) / (
-                sigma_horz * width), 2) / 2 + math.pow((i + 1 - center_y) / (sigma_vert * height), 2) / 2))
+                sigma_horz * width), 2) / 2.0 + math.pow((i + 1 - center_y) / (sigma_vert * height), 2) / 2.0))
     if normalize:
         gauss = gauss / np.sum(gauss)
     return gauss
@@ -61,7 +61,7 @@ def transform(point, center, scale, resolution, invert=False):
     _pt[0] = point[0]
     _pt[1] = point[1]
 
-    h = 200 * scale
+    h = 200.0 * scale
     t = torch.eye(3)
     t[0, 0] = resolution / h
     t[1, 1] = resolution / h
@@ -76,12 +76,12 @@ def transform(point, center, scale, resolution, invert=False):
     return new_point.int()
 
 
-def crop(image, center, scale, resolution=256):
+def crop(image, center, scale, resolution=256.0):
     # Crop around the center point
     """ Crops the image around the center. Input is expected to be an np.ndarray """
     ul = transform([1, 1], center, scale, resolution, True)
     br = transform([resolution, resolution], center, scale, resolution, True)
-    pad = math.ceil(torch.norm((ul - br).float()) / 2 - (br[0] - ul[0]) / 2)
+    pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
     if image.ndim > 2:
         newDim = np.array([br[1] - ul[1], br[0] - ul[0],
                            image.shape[2]], dtype=np.int32)
