@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import time
@@ -69,7 +70,8 @@ def transform(point, center, scale, resolution, invert=False):
 
     if invert:
         t = torch.inverse(t)
-    new_point = (t @ _pt)[0:2]
+
+    new_point = (torch.matmul(t,_pt))[0:2]
 
     return new_point.int()
 

@@ -8,17 +8,67 @@ Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning 
 
 Note: For the lua version check [here](https://github.com/1adrianb/2D-and-3D-face-alignment). For numerical evaluations it is recommended to use the lua version which uses indentical models with the ones evaluated in the paper.
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg)](https://travis-ci.com/1adrianb/face-alignment)
 
 ## Features
 
 #### Detect 2D facial landmarks in pictures
 
+<p align='center'>
+<img src='docs/images/2dlandmarks.png' title='3D-FAN-Full example' style='max-width:600px'></img>
+</p>
+
+```python
+import face_alignment
+import scipy.io as io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=True, flip_input=False)
+
+input = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.get_landmarks(input)
+```
+
 #### Detect 3D facial landmarks in pictures
+
+<p align='center'>
+<img src='https://www.adrianbulat.com/images/image-z-examples.png' title='3D-FAN-Full example' style='max-width:600px'></img>
+</p>
+
+```python
+import face_alignment
+import scipy.io as io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, enable_cuda=True, flip_input=False)
+
+input = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.get_landmarks(input)
+```
 
 #### Find all faces present in a given image
 
+```python
+import face_alignment
+import scipy.io as io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
+
+input = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.detect_faces(input)
+```
+
 #### Process an entire directory in one go
+
+```python
+import face_alignment
+import scipy.io as io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
+
+input = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.process_folder('../test/assets/', all_faces=True)
+```
+
+Please also see the ``examples`` folder
 
 ## Instalation
 
@@ -91,6 +141,10 @@ docker build -t face-alignment .
 ## How does it work?
 
 While here the work is presented as a black-box, if you want to know more about the intrisecs of the method please check the original paper either on arxiv or my [webpage](https://www.adrianbulat.com).
+
+## Contributions
+
+All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue.
 
 ## Citation
 

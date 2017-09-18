@@ -23,13 +23,12 @@ RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-4.
      /opt/conda/bin/conda clean -ya 
 ENV PATH /opt/conda/envs/pytorch-py35/bin:$PATH
 RUN conda install --name pytorch-py35 -c soumith magma-cuda80
-
-# This must be done before pip so that requirements.txt is available
-WORKDIR /opt/pytorch
-COPY . .
-
-RUN TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
-    CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
-    pip install -v .
+RUN conda install pytorch torchvision cuda80 -c soumith
 
 # Install face-alignment package
+WORKDIR /workspace
+RUN chmod -R a+w /workspace
+RUN git clone https://github.com/1adrianb/face-alignment
+WORKDIR /workspace/face-alignment
+RUN pip install -r requirements.txt
+RUN python setup.py install
