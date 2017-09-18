@@ -58,7 +58,7 @@ class FaceAlignment:
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
-        
+
         if not os.path.exists(base_path):
             os.makedirs(base_path)
 
