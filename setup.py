@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 # To use consisten encodings
 from codecs import open
 from os import path
@@ -28,7 +28,7 @@ setup(
     # Author details
     author="Adrian Bulat",
     author_email="adrian.bulat@nottingham.ac.uk",
-    url="https://github.com/1adrianb/face-alignment"
+    url="https://github.com/1adrianb/face-alignment",
 
     # Package info
     packages=find_packages(exclude=('test',)),
