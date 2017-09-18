@@ -15,7 +15,6 @@ requirements = [
     'numpy',
     'scipy>=0.17.0',
     'opencv-python',
-    'Cython',
     'scikit-image'
 ]
 
