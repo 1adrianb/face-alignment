@@ -1,1 +1,2 @@
 opencv-python
+dlib>=19.5.0
