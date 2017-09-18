@@ -6,7 +6,9 @@ Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning 
 
 <p align="center"><img src="docs/images/face-alignment-adrian.gif" /></p>
 
-Note: For the lua version check [here](https://github.com/1adrianb/2D-and-3D-face-alignment). For numerical evaluations it is recommended to use the lua version which uses indentical models with the ones evaluated in the paper.
+**Note:** The lua version is available [here](https://github.com/1adrianb/2D-and-3D-face-alignment).
+
+For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg)](https://travis-ci.com/1adrianb/face-alignment)
 
