@@ -6,7 +6,10 @@ import torch.nn as nn
 from torch.autograd import Variable
 from enum import Enum
 from skimage import io
-import urllib.request
+try:
+    import urllib.request as request_file
+except BaseException:
+    import urllib as request_file
 
 from .models import FAN, ResNetDepth
 from .utils import *
@@ -41,7 +44,7 @@ class FaceAlignment:
         network_size (``NetworkSize`` object): an enum defining the size of the network (for the 2D and 2.5D points).
         enable_cuda (bool, optional): If True, all the computations will be done on a CUDA-enabled GPU (recommended).
         enable_cudnn (bool, optional): If True, cudnn library will be used in the benchmark mode
-        flip_input (bool, optional): Increase the network accuracy by doing a second forward passed with 
+        flip_input (bool, optional): Increase the network accuracy by doing a second forward passed with
                                     the flipped version of the image
 
     Example:
@@ -66,7 +69,7 @@ class FaceAlignment:
                     os.makedirs(base_path)
                 print("Downloading the face detection CNN. Please wait...")
 
-                urllib.request.urlretrieve(
+                request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat",
                     os.path.join(path_to_detector),
                     reporthook)
@@ -88,13 +91,17 @@ class FaceAlignment:
         if not os.path.isfile(fan_path):
             print("Downloading the Face Alignment Network(FAN). Please wait...")
 
-            urllib.request.urlretrieve(
+            request_file.urlretrieve(
                 "https://www.adrianbulat.com/downloads/python-fan/" +
                 network_name, os.path.join(fan_path),
                 reporthook)
 
-        fan_weights = torch.load(fan_path, map_location=lambda storage, loc: storage)
-        fan_dict = {k.replace('module.', ''): v for k, v in fan_weights['state_dict'].items()}
+        fan_weights = torch.load(
+            fan_path,
+            map_location=lambda storage,
+            loc: storage)
+        fan_dict = {k.replace('module.', ''): v for k,
+                    v in fan_weights['state_dict'].items()}
 
         self.face_alignemnt_net.load_state_dict(fan_dict)
 
@@ -110,13 +117,18 @@ class FaceAlignment:
                 print(
                     "Downloading the Face Alignment depth Network (FAN-D). Please wait...")
 
-                urllib.request.urlretrieve(
+                request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/python-fan/depth.pth.tar",
                     os.path.join(depth_model_path),
                     reporthook)
 
-            depth_weights = torch.load(depth_model_path, map_location=lambda storage, loc: storage)
-            depth_dict = {k.replace('module.', ''): v for k, v in depth_weights['state_dict'].items()}
+            depth_weights = torch.load(
+                depth_model_path,
+                map_location=lambda storage,
+                loc: storage)
+            depth_dict = {
+                k.replace('module.', ''): v for k,
+                v in depth_weights['state_dict'].items()}
             self.depth_prediciton_net.load_state_dict(depth_dict)
 
             if self.enable_cuda:
@@ -127,7 +139,7 @@ class FaceAlignment:
         """Run the dlib face detector over an image
 
         Args:
-            image (``ndarray`` object or string): either the path to the image or an image previosly opened 
+            image (``ndarray`` object or string): either the path to the image or an image previosly opened
             on which face detection will be performed.
 
         Returns:

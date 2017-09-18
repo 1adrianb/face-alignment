@@ -7,8 +7,10 @@ import numpy as np
 import cv2
 
 
-def _gaussian(size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
-              height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5, mean_vert=0.5):
+def _gaussian(
+        size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
+        height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,
+        mean_vert=0.5):
     # handle some defaults
     if width is None:
         width = size
@@ -35,7 +37,8 @@ def draw_gaussian(image, point, sigma):
     # Check if the gaussian is inside
     ul = [math.floor(point[0] - 3 * sigma), math.floor(point[1] - 3 * sigma)]
     br = [math.floor(point[0] + 3 * sigma), math.floor(point[1] + 3 * sigma)]
-    if (ul[0] > image.shape[1] or ul[1] > image.shape[0] or br[0] < 1 or br[1] < 1):
+    if (ul[0] > image.shape[1] or ul[1] >
+            image.shape[0] or br[0] < 1 or br[1] < 1):
         return image
     size = 6 * sigma + 1
     g = _gaussian(size)
@@ -46,10 +49,10 @@ def draw_gaussian(image, point, sigma):
     img_x = [max(1, ul[0]), min(br[0], image.shape[1])]
     img_y = [max(1, ul[1]), min(br[1], image.shape[0])]
     assert (g_x[0] > 0 and g_y[1] > 0)
-    image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] = image[img_y[0] - 1:img_y[1], 
-                                                                img_x[0] - 1:img_x[1]]
-                                                                 + g[g_y[0] - 1:g_y[1], 
-                                                                 g_x[0] - 1:g_x[1]]
+    image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]
+          ] = image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]]
+        + g[g_y[0] - 1:g_y[1],
+            g_x[0] - 1:g_x[1]]
     image[image > 1] = 1
     return image
 
@@ -113,8 +116,11 @@ def get_preds_fromhm(hm, center=None, scale=None):
             hm_ = hm[i, j, :]
             pX, pY = preds[i, j, 0], preds[i, j, 1]
             if pX > 1 and pX < 64 and pY > 1 and pY < 64:
-                diff = torch.FloatTensor([hm_[int(pY), int(pX) + 1] - hm_[int(pY), int(
-                    pX) - 1], hm_[int(pY) + 1, int(pX)] - hm_[int(pY) - 1, int(pX)]])
+                diff = torch.FloatTensor(
+                    [hm_[int(pY),
+                         int(pX) + 1] - hm_[int(pY),
+                                            int(pX) - 1],
+                     hm_[int(pY) + 1, int(pX)] - hm_[int(pY) - 1, int(pX)]])
                 preds[i, j].add(diff.sign().mul(.25))
 
     preds.add_(1)
@@ -137,7 +143,7 @@ def appdata_dir(appname=None, roaming=False):
     Get the path to the application directory, where applications are allowed
     to write user specific files (e.g. configurations). For non-user specific
     data, consider using common_appdata_dir().
-    If appname is given, a subdir is appended (and created if necessary). 
+    If appname is given, a subdir is appended (and created if necessary).
     If roaming is True, will prefer a roaming directory (Windows Vista/7).
     """
 
@@ -204,10 +210,10 @@ def reporthook(count, block_size, total_size):
 
 def shuffle_lr(parts, pairs=None):
     if pairs is None:
-        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10], 
-        [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45], 
-        [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34], 
-        [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
+        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10],
+                 [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45],
+                 [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34],
+                 [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
     for matched_p in pairs:
         idx1, idx2 = matched_p[0], matched_p[1]
         tmp = np.copy(parts[..., idx1])

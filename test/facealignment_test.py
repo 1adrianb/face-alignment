@@ -1,6 +1,7 @@
 import unittest
 from face_alignment import *
 
+
 class Tester(unittest.TestCase):
     @classmethod
     def setUpClass(self):

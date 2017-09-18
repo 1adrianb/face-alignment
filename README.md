@@ -4,10 +4,11 @@ Detect facial landmarks from Python using the world's most accurate face alignme
 
 Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning based face alignment method. For detecting faces the library makes use of [dlib](http://dlib.net/) library.
 
-<p align="center"><img src="https:/www.adrianbulat.com/images/face-alignment-adrian.gif" /></p>
+<p align="center"><img src="docs/images/face-alignment-adrian.gif" /></p>
 
 Note: For the lua version check [here](https://github.com/1adrianb/2D-and-3D-face-alignment). For numerical evaluations it is recommended to use the lua version which uses indentical models with the ones evaluated in the paper.
 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 ## Features
 
