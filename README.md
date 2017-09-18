@@ -32,13 +32,65 @@ While not required, for optimal performance(especially for the detector) it is *
 
 ### Binaries
 
+Conda builds are coming soon!
+
 ### From source
+
+ Install pytorch and pytorch dependencies. Instructions taken from [pytorch readme](https://github.com/pytorch/pytorch). For a more updated version check the framework github page.
+
+ On Linux
+```bash
+export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" # [anaconda root directory]
+
+# Install basic dependencies
+conda install numpy pyyaml mkl setuptools cmake gcc cffi
+
+# Add LAPACK support for the GPU
+conda install -c soumith magma-cuda80 # or magma-cuda75 if CUDA 7.5
+```
+
+On OSX
+```bash
+export CMAKE_PREFIX_PATH=[anaconda root directory]
+conda install numpy pyyaml setuptools cmake cffi
+```
+#### Get the PyTorch source
+```bash
+git clone --recursive https://github.com/pytorch/pytorch
+```
+
+#### Install PyTorch
+On Linux
+```bash
+python setup.py install
+```
+
+On OSX
+```bash
+MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py install
+```
+
+
+#### Get the Face Alignment source code
+```bash
+git clone https://github.com/1adrianb/face-alignment
+```
+#### Install the Face Alignment lib
+```bash
+pip install -r requirements.txt
+python setup.py install
+```
 
 ### Docker image
 
+A Dockerfile is provided to build images with cuda support and cudnn v5. For more instructions about running and building a docker image check the orginal Docker documentation.
+```
+docker build -t face-alignment .
+```
+
 ## How does it work?
 
-While here, the work is presented as a black-box, if you want to know more about the intrisecs of the method please check the original paper either on arxiv or my [webpage](https://www.adrianbulat.com).
+While here the work is presented as a black-box, if you want to know more about the intrisecs of the method please check the original paper either on arxiv or my [webpage](https://www.adrianbulat.com).
 
 ## Citation
 
@@ -57,5 +109,5 @@ For citing dlib, pytorch or any other packages used here please check the origin
 
 * To the [dlib developers](http://dlib.net/) for making available the pretrained face detection model
 * To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
-* To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for making the research posible in the first place.
+* To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
 * To all over python developers that made available the rest of the packages used in this repository.

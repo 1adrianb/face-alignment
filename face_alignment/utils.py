@@ -50,9 +50,7 @@ def draw_gaussian(image, point, sigma):
     img_y = [max(1, ul[1]), min(br[1], image.shape[0])]
     assert (g_x[0] > 0 and g_y[1] > 0)
     image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]
-          ] = image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]]
-        + g[g_y[0] - 1:g_y[1],
-            g_x[0] - 1:g_x[1]]
+          ] = image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] + g[g_y[0] - 1:g_y[1], g_x[0] - 1:g_x[1]]
     image[image > 1] = 1
     return image
 
