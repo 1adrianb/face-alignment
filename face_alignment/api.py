@@ -40,7 +40,7 @@ class FaceAlignment:
         landmarks_type (``LandmarksType`` object): an enum defining the type of predicted points.
         network_size (``NetworkSize`` object): an enum defining the size of the network (for the 2D and 2.5D points).
         enable_cuda (bool, optional): If True, all the computations will be done on a CUDA-enabled GPU (recommended).
-        enable_cudnn (bool, optional): If True, cudnn library will be used
+        enable_cudnn (bool, optional): If True, cudnn library will be used in the benchmark mode
         flip_input (bool, optional): Increase the network accuracy by doing a second forward passed with the flipped version of the image
 
     Example:
@@ -48,13 +48,16 @@ class FaceAlignment:
     """
 
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
-                 enable_cuda=True, enabled_cudnn=True, flip_input=False):
+                 enable_cuda=True, enable_cudnn=True, flip_input=False):
         self.enable_cuda = enable_cuda
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
+        if enable_cudnn and self.enable_cuda:
+            torch.backends.cudnn.benchmark = True
+
         # Initialise the face detector
-        if enable_cuda:
+        if self.enable_cuda:
             path_to_detector = os.path.join(
                 base_path, "mmod_human_face_detector.dat")
             if not os.path.isfile(path_to_detector):
@@ -74,7 +77,7 @@ class FaceAlignment:
             self.face_detector = dlib.get_frontal_face_detector()
 
         # Initialise the face alignemnt networks
-        self.face_alignemnt_net = nn.DataParallel(FAN(int(network_size)))
+        self.face_alignemnt_net = FAN(int(network_size))
         if landmarks_type == LandmarksType._2D:
             network_name = '2DFAN-' + str(int(network_size)) + '.pth.tar'
         else:
@@ -89,16 +92,18 @@ class FaceAlignment:
                 network_name, os.path.join(fan_path),
                 reporthook)
 
-        fan_weights = torch.load(fan_path)
-        self.face_alignemnt_net.load_state_dict(fan_weights['state_dict'])
+        fan_weights = torch.load(fan_path, map_location=lambda storage, loc: storage)
+        fan_dict = {k.replace('module.',''): v for k, v in fan_weights['state_dict'].items()}
 
+        self.face_alignemnt_net.load_state_dict(fan_dict)
+        
         if self.enable_cuda:
             self.face_alignemnt_net.cuda()
-        self.face_alignemnt_net.train()
+        self.face_alignemnt_net.eval()
 
         # Initialiase the depth prediciton network
         if landmarks_type == LandmarksType._3D:
-            self.depth_prediciton_net = nn.DataParallel(ResNetDepth())
+            self.depth_prediciton_net = ResNetDepth()
             depth_model_path = os.path.join(base_path, 'depth.pth.tar')
             if not os.path.isfile(depth_model_path):
                 print(
@@ -109,11 +114,11 @@ class FaceAlignment:
                     os.path.join(depth_model_path),
                     reporthook)
 
-            depth_weights = torch.load(depth_model_path)
-            self.depth_prediciton_net.load_state_dict(
-                depth_weights['state_dict'])
+            depth_weights = torch.load(depth_model_path, map_location=lambda storage, loc: storage)
+            depth_dict = {k.replace('module.',''): v for k, v in depth_weights['state_dict'].items()}
+            self.depth_prediciton_net.load_state_dict(depth_dict)
 
-            if enable_cuda:
+            if self.enable_cuda:
                 self.depth_prediciton_net.cuda()
             self.depth_prediciton_net.eval()
 
@@ -187,13 +192,6 @@ class FaceAlignment:
                         (pts_img, depth_pred * (1 / (256 / (200 * scale)))), 1)
 
                 landmarks.append(pts_img.numpy())
-                # TODO Remove plot
-                import matplotlib.pyplot as plt
-                plt.imshow(inp.view(3, 256, 256).float(
-                ).numpy().swapaxes(0, 1).swapaxes(1, 2))
-                pts = pts.view(68, 2).numpy()
-                plt.plot(pts[:, 0], pts[:, 1], 'ro')
-                plt.show()
         else:
             print("Warning: No faces were detected.")
             return None

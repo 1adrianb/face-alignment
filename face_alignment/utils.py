@@ -99,7 +99,7 @@ def crop(image, center, scale, resolution=256):
     return newImg
 
 
-def get_preds_fromhm(hm, center, scale):
+def get_preds_fromhm(hm, center=None, scale=None):
     max, idx = torch.max(
         hm.view(hm.size(0), hm.size(1), hm.size(2) * hm.size(3)), 2)
     preds = idx.view(idx.size(0), idx.size(1), 1).repeat(1, 1, 2).float()
@@ -115,13 +115,14 @@ def get_preds_fromhm(hm, center, scale):
                     pX) - 1], hm_[int(pY) + 1, int(pX)] - hm_[int(pY) - 1, int(pX)]])
                 preds[i, j].add(diff.sign().mul(.25))
 
-    preds.add(-.5)
+    preds.add_(1)
 
     preds_orig = torch.zeros(preds.size())
-    for i in range(hm.size(0)):
-        for j in range(hm.size(1)):
-            preds_orig[i, j] = transform(
-                preds[i, j], center, scale, hm.size(2), True)
+    if center is not None and scale is not None:
+        for i in range(hm.size(0)):
+            for j in range(hm.size(1)):
+                preds_orig[i, j] = transform(
+                    preds[i, j], center, scale, hm.size(2), True)
 
     return preds, preds_orig
 
