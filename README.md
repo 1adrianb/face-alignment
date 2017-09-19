@@ -166,4 +166,4 @@ For citing dlib, pytorch or any other packages used here please check the origin
 * To the [dlib developers](http://dlib.net/) for making available the pretrained face detection model
 * To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
 * To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
-* To all over python developers that made available the rest of the packages used in this repository.
+* To all other python developers that made available the rest of the packages used in this repository.
