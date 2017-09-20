@@ -72,7 +72,7 @@ preds = fa.process_folder('../test/assets/', all_faces=True)
 
 Please also see the ``examples`` folder
 
-## Instalation
+## Installation
 
 ### Requirements
 
