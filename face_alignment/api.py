@@ -177,7 +177,7 @@ class FaceAlignment:
                     (2, 0, 1))).float().div(255.0).unsqueeze_(0)
 
                 if self.enable_cuda:
-                    inp.cuda()
+                    inp = inp.cuda()
 
                 out = self.face_alignemnt_net(
                     Variable(inp, volatile=True))[-1].data.cpu()
@@ -196,7 +196,7 @@ class FaceAlignment:
                     heatmaps = torch.from_numpy(
                         heatmaps).view(1, 68, 256, 256).float()
                     if self.enable_cuda:
-                        heatmaps.cuda()
+                        heatmaps = heatmaps.cuda()
                     depth_pred = self.depth_prediciton_net(
                         Variable(
                             torch.cat(
