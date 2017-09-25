@@ -22,7 +22,7 @@ For numerical evaluations it is highly recommended to use the lua version which 
 
 ```python
 import face_alignment
-import scipy.io as io
+from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=True, flip_input=False)
 
@@ -38,7 +38,7 @@ preds = fa.get_landmarks(input)
 
 ```python
 import face_alignment
-import scipy.io as io
+from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, enable_cuda=True, flip_input=False)
 
@@ -50,7 +50,7 @@ preds = fa.get_landmarks(input)
 
 ```python
 import face_alignment
-import scipy.io as io
+from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
 
@@ -62,7 +62,7 @@ preds = fa.detect_faces(input)
 
 ```python
 import face_alignment
-import scipy.io as io
+from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
 
