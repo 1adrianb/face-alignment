@@ -1,6 +1,6 @@
 # Face Recognition
 
-Detect facial landmarks from Python using the world's most accurate face alignment network, capable of detection points in both 2D and 3D coordinates.
+Detect facial landmarks from Python using the world's most accurate face alignment network, capable of detecting points in both 2D and 3D coordinates.
 
 Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning based face alignment method. For detecting faces the library makes use of [dlib](http://dlib.net/) library.
 
