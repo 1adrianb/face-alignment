@@ -47,14 +47,18 @@ class FaceAlignment:
         enable_cudnn (bool, optional): If True, cudnn library will be used in the benchmark mode
         flip_input (bool, optional): Increase the network accuracy by doing a second forward passed with
                                     the flipped version of the image
+        use_cnn_face_detector (bool, optional): If True, dlib's CNN based face detector is used even if CUDA
+                                                is disabled.
 
     Example:
         >>> FaceAlignment(NetworkSize.2D, flip_input=False)
     """
 
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
-                 enable_cuda=True, enable_cudnn=True, flip_input=False):
+                 enable_cuda=True, enable_cudnn=True, flip_input=False,
+                 use_cnn_face_detector=False):
         self.enable_cuda = enable_cuda
+        self.use_cnn_face_detector = use_cnn_face_detector
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
@@ -66,7 +70,7 @@ class FaceAlignment:
             torch.backends.cudnn.benchmark = True
 
         # Initialise the face detector
-        if self.enable_cuda:
+        if self.enable_cuda or self.use_cnn_face_detector:
             path_to_detector = os.path.join(
                 base_path, "mmod_human_face_detector.dat")
             if not os.path.isfile(path_to_detector):
@@ -163,7 +167,7 @@ class FaceAlignment:
             for i, d in enumerate(detected_faces):
                 if i > 1 and not all_faces:
                     break
-                if self.enable_cuda:
+                if self.enable_cuda or self.use_cnn_face_detector:
                     d = d.rect
 
                 center = torch.FloatTensor(
