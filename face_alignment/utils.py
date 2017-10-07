@@ -209,8 +209,13 @@ def shuffle_lr(parts, pairs=None):
 
 
 def flip(tensor, is_label=False):
+    was_cuda = False
     if isinstance(tensor, torch.Tensor):
         tensor = tensor.numpy()
+    elif isinstance(tensor, torch.cuda.FloatTensor):
+        tensor = tensor.cpu().numpy()
+        was_cuda = True
+
     was_squeezed = False
     if tensor.ndim == 4:
         tensor = np.squeeze(tensor)
@@ -223,4 +228,7 @@ def flip(tensor, is_label=False):
         tensor = cv2.flip(tensor, 1).reshape(tensor.shape)
     if was_squeezed:
         tensor = np.expand_dims(tensor, axis=0)
-    return torch.from_numpy(tensor)
+    tensor = torch.from_numpy(tensor)
+    if was_cuda:
+       tensor = tensor.cuda()
+    return tensor
