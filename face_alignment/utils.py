@@ -81,7 +81,7 @@ def crop(image, center, scale, resolution=256.0):
     """ Crops the image around the center. Input is expected to be an np.ndarray """
     ul = transform([1, 1], center, scale, resolution, True)
     br = transform([resolution, resolution], center, scale, resolution, True)
-    pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
+    #pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
     if image.ndim > 2:
         newDim = np.array([br[1] - ul[1], br[0] - ul[0],
                            image.shape[2]], dtype=np.int32)
@@ -109,7 +109,7 @@ def get_preds_fromhm(hm, center=None, scale=None):
         hm.view(hm.size(0), hm.size(1), hm.size(2) * hm.size(3)), 2)
     preds = idx.view(idx.size(0), idx.size(1), 1).repeat(1, 1, 2).float()
     preds[..., 0].apply_(lambda x: (x - 1) % hm.size(3) + 1)
-    preds[..., 1].add_(-1).div_(hm.size(2)).floor().add_(1)
+    preds[..., 1].add_(-1).div_(hm.size(2)).floor_().add_(1)
 
     for i in range(preds.size(0)):
         for j in range(preds.size(1)):
@@ -121,7 +121,7 @@ def get_preds_fromhm(hm, center=None, scale=None):
                          int(pX) + 1] - hm_[int(pY),
                                             int(pX) - 1],
                      hm_[int(pY) + 1, int(pX)] - hm_[int(pY) - 1, int(pX)]])
-                preds[i, j].add(diff.sign().mul(.25))
+                preds[i, j].add_(diff.sign().mul(.25))
 
     preds.add_(1)
 
