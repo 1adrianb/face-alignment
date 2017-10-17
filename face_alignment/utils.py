@@ -81,7 +81,7 @@ def crop(image, center, scale, resolution=256.0):
     """ Crops the image around the center. Input is expected to be an np.ndarray """
     ul = transform([1, 1], center, scale, resolution, True)
     br = transform([resolution, resolution], center, scale, resolution, True)
-    #pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
+    # pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
     if image.ndim > 2:
         newDim = np.array([br[1] - ul[1], br[0] - ul[0],
                            image.shape[2]], dtype=np.int32)
@@ -230,5 +230,5 @@ def flip(tensor, is_label=False):
         tensor = np.expand_dims(tensor, axis=0)
     tensor = torch.from_numpy(tensor)
     if was_cuda:
-       tensor = tensor.cuda()
+        tensor = tensor.cuda()
     return tensor
