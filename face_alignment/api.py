@@ -217,7 +217,7 @@ class FaceAlignment:
         return landmarks
 
     def process_folder(self, path, all_faces=False):
-        types = ('*.jpg', '.png')
+        types = ('*.jpg', '*.png')
         images_list = []
         for files in types:
             images_list.extend(glob.glob(files))
