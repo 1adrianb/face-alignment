@@ -105,10 +105,8 @@ class FaceAlignment:
             fan_path,
             map_location=lambda storage,
             loc: storage)
-        fan_dict = {k.replace('module.', ''): v for k,
-                    v in fan_weights['state_dict'].items()}
 
-        self.face_alignemnt_net.load_state_dict(fan_dict)
+        self.face_alignemnt_net.load_state_dict(fan_weights)
 
         if self.enable_cuda:
             self.face_alignemnt_net.cuda()
@@ -173,8 +171,8 @@ class FaceAlignment:
                 center = torch.FloatTensor(
                     [d.right() - (d.right() - d.left()) / 2.0, d.bottom() -
                      (d.bottom() - d.top()) / 2.0])
-                center[1] = center[1] - (d.bottom() - d.top()) * 0.1
-                scale = (d.right() - d.left() + d.bottom() - d.top()) / 200.0
+                center[1] = center[1] - (d.bottom() - d.top()) * 0.12
+                scale = (d.right() - d.left() + d.bottom() - d.top()) / 195.0
 
                 inp = crop(image, center, scale)
                 inp = torch.from_numpy(inp.transpose(

@@ -107,6 +107,7 @@ def crop(image, center, scale, resolution=256.0):
 def get_preds_fromhm(hm, center=None, scale=None):
     max, idx = torch.max(
         hm.view(hm.size(0), hm.size(1), hm.size(2) * hm.size(3)), 2)
+    idx+=1
     preds = idx.view(idx.size(0), idx.size(1), 1).repeat(1, 1, 2).float()
     preds[..., 0].apply_(lambda x: (x - 1) % hm.size(3) + 1)
     preds[..., 1].add_(-1).div_(hm.size(2)).floor_().add_(1)
@@ -114,16 +115,14 @@ def get_preds_fromhm(hm, center=None, scale=None):
     for i in range(preds.size(0)):
         for j in range(preds.size(1)):
             hm_ = hm[i, j, :]
-            pX, pY = preds[i, j, 0], preds[i, j, 1]
+            pX, pY = int(preds[i, j, 0])-1, int(preds[i, j, 1])-1
             if pX > 0 and pX < 63 and pY > 0 and pY < 63:
                 diff = torch.FloatTensor(
-                    [hm_[int(pY),
-                         int(pX) + 1] - hm_[int(pY),
-                                            int(pX) - 1],
-                     hm_[int(pY) + 1, int(pX)] - hm_[int(pY) - 1, int(pX)]])
-                preds[i, j].add_(diff.sign().mul(.25))
+                    [hm_[pY, pX + 1] - hm_[pY, pX - 1],
+                     hm_[pY + 1, pX] - hm_[pY - 1, pX]])
+                preds[i, j].add_(diff.sign_().mul_(.25))
 
-    preds.add_(1)
+    preds.add_(-.5)
 
     preds_orig = torch.zeros(preds.size())
     if center is not None and scale is not None:
