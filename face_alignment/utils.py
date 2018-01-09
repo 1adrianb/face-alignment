@@ -107,7 +107,7 @@ def crop(image, center, scale, resolution=256.0):
 def get_preds_fromhm(hm, center=None, scale=None):
     max, idx = torch.max(
         hm.view(hm.size(0), hm.size(1), hm.size(2) * hm.size(3)), 2)
-    idx + =1
+    idx += 1
     preds = idx.view(idx.size(0), idx.size(1), 1).repeat(1, 1, 2).float()
     preds[..., 0].apply_(lambda x: (x - 1) % hm.size(3) + 1)
     preds[..., 1].add_(-1).div_(hm.size(2)).floor_().add_(1)
