@@ -233,7 +233,7 @@ class FaceAlignment:
             file_path = os.path.join(base_path, data_model)
             try:
                 if os.path.isfile(file_path):
-                    print('Removing '+data_model+' ...')
+                    print('Removing ' + data_model + ' ...')
                     os.unlink(file_path)
             except Exception as e:
                 print(e)
