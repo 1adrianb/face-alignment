@@ -218,7 +218,7 @@ class FaceAlignment:
         types = ('*.jpg', '*.png')
         images_list = []
         for files in types:
-            images_list.extend(glob.glob(files))
+            images_list.extend(glob.glob(os.path.join(path, files)))
 
         predictions = []
         for image_name in images_list:
