@@ -68,7 +68,6 @@ from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
 
-input = io.imread('../test/assets/aflw-test.jpg')
 preds = fa.process_folder('../test/assets/', all_faces=True)
 ```
 
