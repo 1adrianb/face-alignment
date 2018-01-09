@@ -226,3 +226,14 @@ class FaceAlignment:
                 image_name, self.get_landmarks(image_name, all_faces))
 
         return predictions
+
+    def remove_models(self):
+        base_path = os.path.join(appdata_dir('face_alignment'), "data")
+        for data_model in os.listdir(base_path):
+            file_path = os.path.join(base_path, data_model)
+            try:
+                if os.path.isfile(file_path):
+                    print('Removing '+data_model+' ...')
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
