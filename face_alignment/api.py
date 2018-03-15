@@ -163,7 +163,7 @@ class FaceAlignment:
         if len(detected_faces) > 0:
             landmarks = []
             for i, d in enumerate(detected_faces):
-                if i > 1 and not all_faces:
+                if i > 0 and not all_faces:
                     break
                 if self.enable_cuda or self.use_cnn_face_detector:
                     d = d.rect
