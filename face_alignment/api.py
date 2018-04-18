@@ -222,8 +222,8 @@ class FaceAlignment:
 
         predictions = []
         for image_name in images_list:
-            predictions.append(
-                image_name, self.get_landmarks(image_name, all_faces))
+            predictions.append((
+                image_name, self.get_landmarks(image_name, all_faces)))
 
         return predictions
 
