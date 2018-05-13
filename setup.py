@@ -21,7 +21,7 @@ requirements = [
 
 setup(
     name='face_alignment',
-    version='0.1.0',
+    version='0.1.1',
 
     description="Detector 2D or 3D face landmarks from Python",
     long_description=long_description,

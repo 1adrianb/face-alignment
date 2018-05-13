@@ -209,7 +209,7 @@ def shuffle_lr(parts, pairs=None):
 
 def flip(tensor, is_label=False):
     was_cuda = False
-    if isinstance(tensor, torch.Tensor):
+    if isinstance(tensor, torch.FloatTensor):
         tensor = tensor.numpy()
     elif isinstance(tensor, torch.cuda.FloatTensor):
         tensor = tensor.cpu().numpy()

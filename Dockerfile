@@ -1,7 +1,5 @@
 # Based on https://github.com/pytorch/pytorch/blob/master/Dockerfile
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04 
-
-RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
+FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04 
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
          build-essential \
@@ -16,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          libpng-dev &&\
      rm -rf /var/lib/apt/lists/*
 
-RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh  && \
+RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
      chmod +x ~/miniconda.sh && \
      ~/miniconda.sh -b -p /opt/conda && \     
      rm ~/miniconda.sh
@@ -24,7 +22,7 @@ RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-4.
 ENV PATH /opt/conda/bin:$PATH
 
 RUN conda config --set always_yes yes --set changeps1 no && conda update -q conda 
-RUN conda install pytorch torchvision cuda80 -c soumith
+RUN conda install pytorch torchvision cuda90 -c pytorch
 
 # Install face-alignment package
 WORKDIR /workspace
