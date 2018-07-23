@@ -75,9 +75,17 @@ class FaceAlignment:
             if not os.path.isfile(path_to_detector):
                 print("Downloading the face detection CNN. Please wait...")
 
+                path_to_temp_detector = os.path.join(
+                    base_path, "mmod_human_face_detector.dat.download")
+                
+                if os.path.isfile(path_to_temp_detector):
+                    os.remove(os.path.join(path_to_temp_detector))
+
                 request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat",
-                    os.path.join(path_to_detector))
+                    os.path.join(path_to_temp_detector))
+
+                os.rename(os.path.join(path_to_temp_detector),os.path.join(path_to_temp_detector))
 
             self.face_detector = dlib.cnn_face_detection_model_v1(
                 path_to_detector)
@@ -96,9 +104,16 @@ class FaceAlignment:
         if not os.path.isfile(fan_path):
             print("Downloading the Face Alignment Network(FAN). Please wait...")
 
+            fan_temp_path = os.path.join(base_path,network_name+'.download')
+
+            if os.path.isfile(fan_temp_path):
+                os.remove(os.path.join(fan_temp_path))
+
             request_file.urlretrieve(
                 "https://www.adrianbulat.com/downloads/python-fan/" +
-                network_name, os.path.join(fan_path))
+                network_name, os.path.join(fan_temp_path))
+
+            os.rename(os.path.join(fan_temp_path),os.path.join(fan_path))
 
         fan_weights = torch.load(
             fan_path,
@@ -118,11 +133,19 @@ class FaceAlignment:
             if not os.path.isfile(depth_model_path):
                 print(
                     "Downloading the Face Alignment depth Network (FAN-D). Please wait...")
+                
+                depth_model_temp_path = os.path.join(base_path, 'depth.pth.tar.download')
+                
+                if os.path.isfile(depth_model_temp_path):
+                    os.remove(os.path.join(depth_model_temp_path))
+
 
                 request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/python-fan/depth.pth.tar",
-                    os.path.join(depth_model_path))
+                    os.path.join(depth_model_temp_path))
 
+                os.rename(os.path.join(depth_model_temp_path),os.path.join(depth_model_path))
+            
             depth_weights = torch.load(
                 depth_model_path,
                 map_location=lambda storage,
