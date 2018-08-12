@@ -77,7 +77,7 @@ class FaceAlignment:
 
                 path_to_temp_detector = os.path.join(
                     base_path, "mmod_human_face_detector.dat.download")
-                
+
                 if os.path.isfile(path_to_temp_detector):
                     os.remove(os.path.join(path_to_temp_detector))
 
@@ -85,7 +85,7 @@ class FaceAlignment:
                     "https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat",
                     os.path.join(path_to_temp_detector))
 
-                os.rename(os.path.join(path_to_temp_detector),os.path.join(path_to_temp_detector))
+                os.rename(os.path.join(path_to_temp_detector),os.path.join(path_to_detector))
 
             self.face_detector = dlib.cnn_face_detection_model_v1(
                 path_to_detector)
@@ -133,9 +133,9 @@ class FaceAlignment:
             if not os.path.isfile(depth_model_path):
                 print(
                     "Downloading the Face Alignment depth Network (FAN-D). Please wait...")
-                
+
                 depth_model_temp_path = os.path.join(base_path, 'depth.pth.tar.download')
-                
+
                 if os.path.isfile(depth_model_temp_path):
                     os.remove(os.path.join(depth_model_temp_path))
 
@@ -145,7 +145,7 @@ class FaceAlignment:
                     os.path.join(depth_model_temp_path))
 
                 os.rename(os.path.join(depth_model_temp_path),os.path.join(depth_model_path))
-            
+
             depth_weights = torch.load(
                 depth_model_path,
                 map_location=lambda storage,
