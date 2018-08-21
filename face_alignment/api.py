@@ -94,7 +94,7 @@ class FaceAlignment:
             self.face_detector = dlib.get_frontal_face_detector()
 
         # Initialise the face alignemnt networks
-        self.face_alignemnt_net = FAN(int(network_size))
+        self.face_alignment_net = FAN(int(network_size))
         if landmarks_type == LandmarksType._2D:
             network_name = '2DFAN-' + str(int(network_size)) + '.pth.tar'
         else:
@@ -120,11 +120,11 @@ class FaceAlignment:
             map_location=lambda storage,
             loc: storage)
 
-        self.face_alignemnt_net.load_state_dict(fan_weights)
+        self.face_alignment_net.load_state_dict(fan_weights)
 
         if self.enable_cuda:
-            self.face_alignemnt_net.cuda()
-        self.face_alignemnt_net.eval()
+            self.face_alignment_net.cuda()
+        self.face_alignment_net.eval()
 
         # Initialiase the depth prediciton network
         if landmarks_type == LandmarksType._3D:
@@ -205,9 +205,9 @@ class FaceAlignment:
                     if self.enable_cuda:
                         inp = inp.cuda()
 
-                    out = self.face_alignemnt_net(inp)[-1].data.cpu()
+                    out = self.face_alignment_net(inp)[-1].data.cpu()
                     if self.flip_input:
-                        out += flip(self.face_alignemnt_net(flip(inp))
+                        out += flip(self.face_alignment_net(flip(inp))
                                     [-1].data.cpu(), is_label=True)
 
                     pts, pts_img = get_preds_fromhm(out, center, scale)
