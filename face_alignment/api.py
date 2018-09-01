@@ -2,6 +2,7 @@ from __future__ import print_function
 import os
 import glob
 import dlib
+import cv2
 import torch
 import torch.nn as nn
 from enum import Enum
@@ -182,7 +183,8 @@ class FaceAlignment:
             else:
                 image = input_image
 
-            detected_faces = self.detect_faces(image)
+            # Use grayscale image instead of RGB to speed up face detection
+            detected_faces = self.detect_faces(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
             if len(detected_faces) > 0:
                 landmarks = []
                 for i, d in enumerate(detected_faces):
