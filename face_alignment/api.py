@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from enum import Enum
 from skimage import io
+from skimage import color
 try:
     import urllib.request as request_file
 except BaseException:
@@ -183,6 +184,10 @@ class FaceAlignment:
                 image = input_image
 
             detected_faces = self.detect_faces(image)
+
+            if image.ndim == 2:
+                image = color.gray2rgb(image)
+
             if len(detected_faces) > 0:
                 landmarks = []
                 for i, d in enumerate(detected_faces):
