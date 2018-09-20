@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from enum import Enum
 from skimage import io
+from skimage import color
 import cv2
 try:
     import urllib.request as request_file
@@ -184,7 +185,11 @@ class FaceAlignment:
                 image = input_image
 
             # Use grayscale image instead of RGB to speed up face detection
-            detected_faces = self.detect_faces(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY))
+            detected_faces = self.detect_faces(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY))            
+  
+            if image.ndim == 2:
+                image = color.gray2rgb(image)
+
             if len(detected_faces) > 0:
                 landmarks = []
                 for i, d in enumerate(detected_faces):
