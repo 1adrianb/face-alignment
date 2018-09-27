@@ -16,6 +16,7 @@ requirements = [
     'scipy>=0.17.0',
     'opencv-python',
     'scikit-image',
+    'uuid',
     'enum34;python_version<"3.4"'
 ]
 
