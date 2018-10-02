@@ -10,18 +10,14 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
     long_description = readme_file.read()
 
 requirements = [
-    'torch',
     'dlib>=19.5',
-    'numpy',
-    'scipy>=0.17.0',
     'opencv-python',
-    'scikit-image',
     'enum34;python_version<"3.4"'
 ]
 
 setup(
     name='face_alignment',
-    version='0.1.1',
+    version='1.0.0',
 
     description="Detector 2D or 3D face landmarks from Python",
     long_description=long_description,
