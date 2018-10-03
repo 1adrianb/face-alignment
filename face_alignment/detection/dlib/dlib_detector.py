@@ -42,7 +42,7 @@ class DlibDetector(FaceDetector):
             self.face_detector = dlib.get_frontal_face_detector()
 
     def detect_from_image(self, tensor_or_path):
-        image = self.tensor_or_path_to_ndarray(tensor_or_path)
+        image = self.tensor_or_path_to_ndarray(tensor_or_path, rgb=False)
 
         detected_faces = self.face_detector(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
 

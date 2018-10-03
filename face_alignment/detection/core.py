@@ -4,6 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import torch
 import cv2
+from skimage import io
 
 class FaceDetector(object):
     """An abstract class representing a face detector.
@@ -109,18 +110,18 @@ class FaceDetector(object):
         raise NotImplementedError
 
     @staticmethod
-    def tensor_or_path_to_ndarray(tensor_or_path):
+    def tensor_or_path_to_ndarray(tensor_or_path, rgb=True):
         """Convert path (represented as a string) or torch.tensor to a numpy.ndarray
         
         Arguments:
             tensor_or_path {numpy.ndarray, torch.tensor or string} -- path to the image, or the image itself
         """
         if isinstance(tensor_or_path, str):
-            return cv2.imread(tensor_or_path)
+            return cv2.imread(tensor_or_path) if not rgb else io.imread(tensor_or_path)
         elif torch.is_tensor(tensor_or_path):
-            return tensor_or_path.cpu().numpy() # Call cpu in case its coming from cuda
+            return tensor_or_path.cpu().numpy()[...,::-1].copy() if not rgb else tensor_or_path.cpu().numpy() # Call cpu in case its coming from cuda
         elif isinstance(tensor_or_path, np.ndarray):
-            return tensor_or_path
+            return tensor_or_path[...,::-1].copy() if not rgb else tensor_or_path
         else:
             raise TypeError
         

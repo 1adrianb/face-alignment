@@ -37,7 +37,7 @@ class NetworkSize(Enum):
 
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
-                 device='cuda', flip_input=False, face_detector='dlib', verbose=False):
+                 device='cuda', flip_input=False, face_detector='sfd', verbose=False):
         self.device = device
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
@@ -101,7 +101,6 @@ class FaceAlignment:
                 if os.path.isfile(depth_model_temp_path):
                     os.remove(os.path.join(depth_model_temp_path))
 
-
                 request_file.urlretrieve(
                     "https://www.adrianbulat.com/downloads/python-fan/depth.pth.tar",
                     os.path.join(depth_model_temp_path))
@@ -135,6 +134,8 @@ class FaceAlignment:
 
         if image.ndim == 2:
             image = color.gray2rgb(image)
+        elif image.ndim == 4:
+            image = image[...,:3]
 
         if detected_faces is None:
             detected_faces = self.face_detector.detect_from_image(image[...,::-1].copy())
@@ -190,11 +191,13 @@ class FaceAlignment:
 
         predictions = {}
         for image_path, bounding_boxes in detected_faces.items():
-            image = io.imread()
-            
+            image = io.imread(image_path)
+            preds = self.get_landmarks_from_image(image, bounding_boxes)
+            predictions[image_path] = preds
         
         return predictions
 
+    @staticmethod
     def remove_models(self):
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
         for data_model in os.listdir(base_path):

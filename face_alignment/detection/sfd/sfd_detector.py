@@ -22,32 +22,35 @@ class SFDDetector(FaceDetector):
         # Initialise the face detector
         if path_to_detector is None:
             path_to_detector = os.path.join(
-                base_path, "mmod_human_face_detector.dat")
+                base_path, "s3fd_convert.pth")
 
             if not os.path.isfile(path_to_detector):
                 print("Downloading the face detection CNN. Please wait...")
 
                 path_to_temp_detector = os.path.join(
-                    base_path, "mmod_human_face_detector.dat.download")
+                    base_path, "s3fd_convert.pth.download")
 
                 if os.path.isfile(path_to_temp_detector):
                     os.remove(os.path.join(path_to_temp_detector))
 
                 request_file.urlretrieve(
-                    "https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat",
+                    "https://www.adrianbulat.com/downloads/python-fan/s3fd_convert.pth",
                     os.path.join(path_to_temp_detector))
 
                 os.rename(os.path.join(path_to_temp_detector), os.path.join(path_to_detector))
-
-        self.face_detector = dlib.cnn_face_detection_model_v1(path_to_detector)
+        
+        self.face_detector = s3fd()
+        self.face_detector.load_state_dict(torch.load(path_to_detector))
+        self.face_detector.to(device)
+        self.face_detector.eval()
 
     def detect_from_image(self, tensor_or_path):
         image = self.tensor_or_path_to_ndarray(tensor_or_path)
 
-        bboxlist = detect(self.net, image, device=self.device)
+        bboxlist = detect(self.face_detector, image, device=self.device)
         keep = nms(bboxlist, 0.3)
         bboxlist = bboxlist[keep, :]
-        bboxlist = [x for x in bboxlist if x[-1]>self.threshold]
+        bboxlist = [x for x in bboxlist if x[-1]>0.5]
 
         return bboxlist
 
