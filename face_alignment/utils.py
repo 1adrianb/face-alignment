@@ -133,9 +133,32 @@ def get_preds_fromhm(hm, center=None, scale=None):
 
     return preds, preds_orig
 
+def shuffle_lr(parts, pairs=None):
+    if pairs is None:
+        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10],
+                 [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45],
+                 [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34],
+                 [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
+    for matched_p in pairs:
+        idx1, idx2 = matched_p[0], matched_p[1]
+        tmp = parts[:, idx1, ...].clone()
+        parts[:, idx1, ...].copy_(parts[:, idx2, ...])
+        parts[:, idx2, ...].copy_(tmp)
+    return parts
+
+
+def flip(tensor, is_label=False):
+    if not torch.is_tensor(tensor):
+        tensor = torch.from_numpy(tensor)
+
+    if is_label:
+        tensor = shuffle_lr(tensor).flip(-1)
+    else:
+        tensor = tensor.flip(-1)
+
+    return tensor
+
 # From pyzolib/paths.py (https://bitbucket.org/pyzo/pyzolib/src/tip/paths.py)
-
-
 def appdata_dir(appname=None, roaming=False):
     """ appdata_dir(appname=None, roaming=False)
 
@@ -191,43 +214,3 @@ def appdata_dir(appname=None, roaming=False):
 
     # Done
     return path
-
-
-def shuffle_lr(parts, pairs=None):
-    if pairs is None:
-        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10],
-                 [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45],
-                 [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34],
-                 [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
-    for matched_p in pairs:
-        idx1, idx2 = matched_p[0], matched_p[1]
-        tmp = np.copy(parts[..., idx1])
-        np.copyto(parts[..., idx1], parts[..., idx2])
-        np.copyto(parts[..., idx2], tmp)
-    return parts
-
-
-def flip(tensor, is_label=False):
-    was_cuda = False
-    if isinstance(tensor, torch.FloatTensor):
-        tensor = tensor.numpy()
-    elif isinstance(tensor, torch.cuda.FloatTensor):
-        tensor = tensor.cpu().numpy()
-        was_cuda = True
-
-    was_squeezed = False
-    if tensor.ndim == 4:
-        tensor = np.squeeze(tensor)
-        was_squeezed = True
-    if is_label:
-        tensor = tensor.swapaxes(0, 1).swapaxes(1, 2)
-        tensor = cv2.flip(shuffle_lr(tensor), 1).reshape(tensor.shape)
-        tensor = tensor.swapaxes(2, 1).swapaxes(1, 0)
-    else:
-        tensor = cv2.flip(tensor, 1).reshape(tensor.shape)
-    if was_squeezed:
-        tensor = np.expand_dims(tensor, axis=0)
-    tensor = torch.from_numpy(tensor)
-    if was_cuda:
-        tensor = tensor.cuda()
-    return tensor
