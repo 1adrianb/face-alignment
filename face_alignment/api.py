@@ -1,8 +1,6 @@
 from __future__ import print_function
 import os
-import glob
 import torch
-import torch.nn as nn
 from enum import Enum
 from skimage import io
 from skimage import color
@@ -15,12 +13,17 @@ except BaseException:
 from .models import FAN, ResNetDepth
 from .utils import *
 
-
 class LandmarksType(Enum):
+    """Enum class defining the type of landmarks to detect.
+
+    ``_2D`` - the detected points ``(x,y)`` are detected in a 2D space and follow the visible contour of the face
+    ``_2halfD`` - this points represent the projection of the 3D points into 3D
+    ``_3D`` - detect the points ``(x,y,z)``` in a 3D space
+
+    """
     _2D = 1
     _2halfD = 2
     _3D = 3
-
 
 class NetworkSize(Enum):
     # TINY = 1
