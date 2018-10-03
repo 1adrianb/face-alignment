@@ -6,6 +6,7 @@ import torch
 import cv2
 from skimage import io
 
+
 class FaceDetector(object):
     """An abstract class representing a face detector.
 
@@ -14,7 +15,7 @@ class FaceDetector(object):
     bounding boxes. Optionally, for speed considerations detect from path is
     recommended.
     """
-    
+
     def __init__(self, device, verbose):
         self.device = device
         self.verbose = verbose
@@ -24,7 +25,7 @@ class FaceDetector(object):
                 logger = logging.getLogger(__name__)
                 logger.warning("Detection running on CPU, this may be potentially slow.")
 
-        if not 'cpu' in device and not 'cuda' in device:
+        if 'cpu' not in device and 'cuda' not in device:
             if verbose:
                 logger.error("Expected values for device are: {cpu, cuda} but got: %s", device)
             raise ValueError
@@ -34,9 +35,10 @@ class FaceDetector(object):
 
         This function detects the faces present in a provided BGR(usually)
         image. The input can be either the image itself or the path to it.
-        
+
         Arguments:
-            tensor_or_path {numpy.ndarray, torch.tensor or string} -- the path to an image or the image itself.
+            tensor_or_path {numpy.ndarray, torch.tensor or string} -- the path
+            to an image or the image itself.
 
         Example::
 
@@ -52,14 +54,16 @@ class FaceDetector(object):
 
     def detect_from_directory(self, path, extensions=['.jpg', '.png'], recursive=False, show_progress_bar=True):
         """Detects faces from all the images present in a given directory.
-        
+
         Arguments:
             path {string} -- a string containing a path that points to the folder containing the images
-        
+
         Keyword Arguments:
-            extensions {list} -- list of string containing the extensions to be consider in the following format: ``.extension_name`` (default: {['.jpg', '.png']})
-            recursive {bool} -- option wherever to scan the folder recursively (default: {False})
-            show_progress_bar {bool} -- display a progressbar (default: {True})
+            extensions {list} -- list of string containing the extensions to be
+            consider in the following format: ``.extension_name`` (default:
+            {['.jpg', '.png']}) recursive {bool} -- option wherever to scan the
+            folder recursively (default: {False}) show_progress_bar {bool} --
+            display a progressbar (default: {True})
 
         Example:
         >>> directory = 'data'
@@ -70,7 +74,7 @@ class FaceDetector(object):
         if self.verbose:
             logger = logging.getLogger(__name__)
 
-        if len(extensions)==0:
+        if len(extensions) == 0:
             if self.verbose:
                 logger.error("Expected at list one extension, but none was received.")
             raise ValueError
@@ -80,8 +84,8 @@ class FaceDetector(object):
         additional_pattern = '/**/*' if recursive else '/*'
         files = []
         for extension in extensions:
-            files.extend(glob.glob(path+additional_pattern+extension, recursive=recursive))
-        
+            files.extend(glob.glob(path + additional_pattern + extension, recursive=recursive))
+
         if self.verbose:
             logger.info("Finished searching for images. %s images found", len(files))
             logger.info("Preparing to run the detection.")
@@ -112,16 +116,16 @@ class FaceDetector(object):
     @staticmethod
     def tensor_or_path_to_ndarray(tensor_or_path, rgb=True):
         """Convert path (represented as a string) or torch.tensor to a numpy.ndarray
-        
+
         Arguments:
             tensor_or_path {numpy.ndarray, torch.tensor or string} -- path to the image, or the image itself
         """
         if isinstance(tensor_or_path, str):
             return cv2.imread(tensor_or_path) if not rgb else io.imread(tensor_or_path)
         elif torch.is_tensor(tensor_or_path):
-            return tensor_or_path.cpu().numpy()[...,::-1].copy() if not rgb else tensor_or_path.cpu().numpy() # Call cpu in case its coming from cuda
+            # Call cpu in case its coming from cuda
+            return tensor_or_path.cpu().numpy()[..., ::-1].copy() if not rgb else tensor_or_path.cpu().numpy()
         elif isinstance(tensor_or_path, np.ndarray):
-            return tensor_or_path[...,::-1].copy() if not rgb else tensor_or_path
+            return tensor_or_path[..., ::-1].copy() if not rgb else tensor_or_path
         else:
             raise TypeError
-        

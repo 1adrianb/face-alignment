@@ -21,6 +21,7 @@ class LandmarksType(Enum):
     _2halfD = 2
     _3D = 3
 
+
 class NetworkSize(Enum):
     # TINY = 1
     # SMALL = 2
@@ -35,6 +36,7 @@ class NetworkSize(Enum):
     def __int__(self):
         return self.value
 
+
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
                  device='cuda', flip_input=False, face_detector='sfd', verbose=False):
@@ -48,12 +50,13 @@ class FaceAlignment:
 
         if not os.path.exists(base_path):
             os.makedirs(base_path)
-        
+
         if 'cuda' in device:
             torch.backends.cudnn.benchmark = True
 
         # Get the face detector
-        face_detector_module = __import__('face_alignment.detection.'+face_detector, globals(), locals(), [face_detector], 0)
+        face_detector_module = __import__('face_alignment.detection.' + face_detector,
+                                          globals(), locals(), [face_detector], 0)
         self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose)
 
         # Initialise the face alignemnt networks
@@ -67,7 +70,7 @@ class FaceAlignment:
         if not os.path.isfile(fan_path):
             print("Downloading the Face Alignment Network(FAN). Please wait...")
 
-            fan_temp_path = os.path.join(base_path,network_name+'.download')
+            fan_temp_path = os.path.join(base_path, network_name + '.download')
 
             if os.path.isfile(fan_temp_path):
                 os.remove(os.path.join(fan_temp_path))
@@ -76,7 +79,7 @@ class FaceAlignment:
                 "https://www.adrianbulat.com/downloads/python-fan/" +
                 network_name, os.path.join(fan_temp_path))
 
-            os.rename(os.path.join(fan_temp_path),os.path.join(fan_path))
+            os.rename(os.path.join(fan_temp_path), os.path.join(fan_path))
 
         fan_weights = torch.load(
             fan_path,
@@ -105,7 +108,7 @@ class FaceAlignment:
                     "https://www.adrianbulat.com/downloads/python-fan/depth.pth.tar",
                     os.path.join(depth_model_temp_path))
 
-                os.rename(os.path.join(depth_model_temp_path),os.path.join(depth_model_path))
+                os.rename(os.path.join(depth_model_temp_path), os.path.join(depth_model_path))
 
             depth_weights = torch.load(
                 depth_model_path,
@@ -135,15 +138,15 @@ class FaceAlignment:
         if image.ndim == 2:
             image = color.gray2rgb(image)
         elif image.ndim == 4:
-            image = image[...,:3]
+            image = image[..., :3]
 
         if detected_faces is None:
-            detected_faces = self.face_detector.detect_from_image(image[...,::-1].copy())
-        
-        if len(detected_faces)==0:
+            detected_faces = self.face_detector.detect_from_image(image[..., ::-1].copy())
+
+        if len(detected_faces) == 0:
             print("Warning: No faces were detected.")
             return None
-        
+
         torch.set_grad_enabled(False)
         landmarks = []
         for i, d in enumerate(detected_faces):
@@ -151,7 +154,7 @@ class FaceAlignment:
                 [d[2] - (d[2] - d[0]) / 2.0, d[3] -
                  (d[3] - d[1]) / 2.0])
             center[1] = center[1] - (d[3] - d[1]) * 0.12
-            scale = (d[2]- d[0] +
+            scale = (d[2] - d[0] +
                      d[3] - d[1]) / self.face_detector.reference_scale
 
             inp = crop(image, center, scale)
@@ -194,7 +197,7 @@ class FaceAlignment:
             image = io.imread(image_path)
             preds = self.get_landmarks_from_image(image, bounding_boxes)
             predictions[image_path] = preds
-        
+
         return predictions
 
     @staticmethod

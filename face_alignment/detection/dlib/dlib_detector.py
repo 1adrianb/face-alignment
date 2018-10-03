@@ -10,6 +10,7 @@ except BaseException:
 from ..core import FaceDetector
 from ...utils import appdata_dir
 
+
 class DlibDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, verbose=False):
         super().__init__(device, verbose)

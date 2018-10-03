@@ -13,6 +13,7 @@ from .net_s3fd import s3fd
 from .bbox import *
 from .detect import *
 
+
 class SFDDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, verbose=False):
         super().__init__(device, verbose)
@@ -38,7 +39,7 @@ class SFDDetector(FaceDetector):
                     os.path.join(path_to_temp_detector))
 
                 os.rename(os.path.join(path_to_temp_detector), os.path.join(path_to_detector))
-        
+
         self.face_detector = s3fd()
         self.face_detector.load_state_dict(torch.load(path_to_detector))
         self.face_detector.to(device)
@@ -50,7 +51,7 @@ class SFDDetector(FaceDetector):
         bboxlist = detect(self.face_detector, image, device=self.device)
         keep = nms(bboxlist, 0.3)
         bboxlist = bboxlist[keep, :]
-        bboxlist = [x for x in bboxlist if x[-1]>0.5]
+        bboxlist = [x for x in bboxlist if x[-1] > 0.5]
 
         return bboxlist
 
@@ -64,4 +65,4 @@ class SFDDetector(FaceDetector):
 
     @property
     def reference_y_shift(self):
-        return 0 
+        return 0
