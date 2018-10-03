@@ -10,7 +10,11 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
     long_description = readme_file.read()
 
 requirements = [
+    'torch',
     'dlib>=19.5',
+    'numpy',
+    'scipy>=0.17',
+    'scikit-image',
     'opencv-python',
     'enum34;python_version<"3.4"'
 ]

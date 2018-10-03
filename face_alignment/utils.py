@@ -7,7 +7,6 @@ import math
 import numpy as np
 import cv2
 
-
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
         height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,
@@ -135,15 +134,13 @@ def get_preds_fromhm(hm, center=None, scale=None):
 
 def shuffle_lr(parts, pairs=None):
     if pairs is None:
-        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10],
-                 [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45],
-                 [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34],
-                 [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
-    for matched_p in pairs:
-        idx1, idx2 = matched_p[0], matched_p[1]
-        tmp = parts[:, idx1, ...].clone()
-        parts[:, idx1, ...].copy_(parts[:, idx2, ...])
-        parts[:, idx2, ...].copy_(tmp)
+        pairs = [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+                    26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 27, 28, 29, 30, 35,
+                    34, 33, 32, 31, 45, 44, 43, 42, 47, 46, 39, 38, 37, 36, 41,
+                    40, 54, 53, 52, 51, 50, 49, 48, 59, 58, 57, 56, 55, 64, 63,
+                    62, 61, 60, 67, 66, 65]
+    parts = parts[:, pairs, ...]
+
     return parts
 
 

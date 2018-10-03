@@ -26,7 +26,7 @@ For numerical evaluations it is highly recommended to use the lua version which 
 import face_alignment
 from skimage import io
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=True, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
 
 input = io.imread('../test/assets/aflw-test.jpg')
 preds = fa.get_landmarks(input)
@@ -42,22 +42,10 @@ preds = fa.get_landmarks(input)
 import face_alignment
 from skimage import io
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, enable_cuda=True, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, flip_input=False)
 
 input = io.imread('../test/assets/aflw-test.jpg')
 preds = fa.get_landmarks(input)
-```
-
-#### Find all faces present in a given image
-
-```python
-import face_alignment
-from skimage import io
-
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
-
-input = io.imread('../test/assets/aflw-test.jpg')
-preds = fa.detect_faces(input)
 ```
 
 #### Process an entire directory in one go
@@ -66,9 +54,9 @@ preds = fa.detect_faces(input)
 import face_alignment
 from skimage import io
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=False, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
 
-preds = fa.process_folder('../test/assets/', all_faces=True)
+preds = fa.get_landmarks_from_directory('../test/assets/')
 ```
 
 Please also see the ``examples`` folder
@@ -164,7 +152,6 @@ For citing dlib, pytorch or any other packages used here please check the origin
 
 ## Acknowledgements
 
-* To the [dlib developers](http://dlib.net/) for making available the pretrained face detection model
 * To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
 * To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
 * To all other python developers that made available the rest of the packages used in this repository.
