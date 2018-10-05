@@ -31,7 +31,7 @@ def detect(net, img, device):
 
     bboxlist = []
     for i in range(len(olist) // 2):
-        olist[i * 2] = F.softmax(olist[i * 2])
+        olist[i * 2] = F.softmax(olist[i * 2], dim=1)
     olist = [oelem.data.cpu() for oelem in olist]
     for i in range(len(olist) // 2):
         ocls, oreg = olist[i * 2], olist[i * 2 + 1]
