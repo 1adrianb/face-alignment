@@ -4,7 +4,6 @@ import torch
 
 from ..core import FaceDetector
 
-
 class FolderDetector(FaceDetector):
     '''This is a simple helper module that assumes the faces were detected already
         (either previously or are provided as ground truth).

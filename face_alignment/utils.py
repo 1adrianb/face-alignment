@@ -7,7 +7,6 @@ import math
 import numpy as np
 import cv2
 
-
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
         height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,
@@ -158,8 +157,6 @@ def flip(tensor, is_label=False):
     return tensor
 
 # From pyzolib/paths.py (https://bitbucket.org/pyzo/pyzolib/src/tip/paths.py)
-
-
 def appdata_dir(appname=None, roaming=False):
     """ appdata_dir(appname=None, roaming=False)
 

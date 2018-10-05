@@ -4,6 +4,7 @@ import torch
 from enum import Enum
 from skimage import io
 from skimage import color
+import numpy as np
 import cv2
 try:
     import urllib.request as request_file
@@ -164,26 +165,29 @@ class FaceAlignment:
 
             inp = crop(image, center, scale)
             inp = torch.from_numpy(inp.transpose(
-                (2, 0, 1))).float().div(255.0).unsqueeze_(0)
+                (2, 0, 1))).float()
 
             inp = inp.to(self.device)
+            inp.div_(255.0).unsqueeze_(0)
 
-            out = self.face_alignment_net(inp)[-1].data.cpu()
+            out = self.face_alignment_net(inp)[-1].detach()
             if self.flip_input:
                 out += flip(self.face_alignment_net(flip(inp))
-                            [-1].data.cpu(), is_label=True)
+                            [-1].detach(), is_label=True)
+            out = out.cpu()
 
             pts, pts_img = get_preds_fromhm(out, center, scale)
             pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
 
             if self.landmarks_type == LandmarksType._3D:
-                heatmaps = np.zeros((68, 256, 256))
+                heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
                 for i in range(68):
                     if pts[i, 0] > 0:
                         heatmaps[i] = draw_gaussian(
                             heatmaps[i], pts[i], 2)
                 heatmaps = torch.from_numpy(
-                    heatmaps).view(1, 68, 256, 256).float()
+                    heatmaps).unsqueeze_(0)
+
                 heatmaps = heatmaps.to(self.device)
                 depth_pred = self.depth_prediciton_net(
                     torch.cat((inp, heatmaps), 1)).data.cpu().view(68, 1)
