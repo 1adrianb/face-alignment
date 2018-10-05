@@ -16,7 +16,7 @@ from .detect import *
 
 class SFDDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, verbose=False):
-        super().__init__(device, verbose)
+        super(SFDDetector, self).__init__(device, verbose)
 
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
 

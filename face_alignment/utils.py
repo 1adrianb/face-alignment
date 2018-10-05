@@ -151,9 +151,9 @@ def flip(tensor, is_label=False):
         tensor = torch.from_numpy(tensor)
 
     if is_label:
-        tensor = shuffle_lr(tensor).flip(-1)
+        tensor = shuffle_lr(tensor).flip(tensor.ndimension() - 1)
     else:
-        tensor = tensor.flip(-1)
+        tensor = tensor.flip(tensor.ndimension() - 1)
 
     return tensor
 

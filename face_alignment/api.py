@@ -13,6 +13,7 @@ except BaseException:
 from .models import FAN, ResNetDepth
 from .utils import *
 
+
 class LandmarksType(Enum):
     """Enum class defining the type of landmarks to detect.
 
@@ -24,6 +25,7 @@ class LandmarksType(Enum):
     _2D = 1
     _2halfD = 2
     _3D = 3
+
 
 class NetworkSize(Enum):
     # TINY = 1
