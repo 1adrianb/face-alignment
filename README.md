@@ -12,7 +12,7 @@ For numerical evaluations it is highly recommended to use the lua version which 
 
 **New retrained models will be posted at the end of november**
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.org/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.org/1adrianb/face-alignment)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment)
 
 ## Features
 
