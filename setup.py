@@ -11,7 +11,6 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
 
 requirements = [
     'torch',
-    'dlib>=19.5',
     'numpy',
     'scipy>=0.17',
     'scikit-image',
