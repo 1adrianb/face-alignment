@@ -105,16 +105,16 @@ class HourGlass(nn.Module):
         self._generate_network(self.depth)
 
     def _generate_network(self, level):
-        self.add_module('b1_' + str(level), ConvBlock(256, 256))
+        self.add_module('b1_' + str(level), ConvBlock(self.features, self.features))
 
-        self.add_module('b2_' + str(level), ConvBlock(256, 256))
+        self.add_module('b2_' + str(level), ConvBlock(self.features, self.features)
 
         if level > 1:
             self._generate_network(level - 1)
         else:
-            self.add_module('b2_plus_' + str(level), ConvBlock(256, 256))
+            self.add_module('b2_plus_' + str(level), ConvBlock(self.features, self.features))
 
-        self.add_module('b3_' + str(level), ConvBlock(256, 256))
+        self.add_module('b3_' + str(level), ConvBlock(self.features, self.features))
 
     def _forward(self, level, inp):
         # Upper branch
