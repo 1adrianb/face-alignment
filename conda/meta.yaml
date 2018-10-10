@@ -1,0 +1,35 @@
+{% set version = "1.0.0" %}
+
+package:
+  name: face_alignment
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 1
+  noarch: generic
+  scipt: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - setuptools
+    - python
+  run:
+    - python
+    - torch
+    - numpy
+    - scikit-image
+    - scipy
+    - opencv-python
+
+about:
+  home: https://github.com/1adrianb/face-alignment
+  license: BSD
+  license_file: LICENSE
+  summary: A face alignment libray in python
+
+extra:
+  recipe-maintainers:
+    - 1adrianb

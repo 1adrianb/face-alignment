@@ -2,15 +2,13 @@
 
 Detect facial landmarks from Python using the world's most accurate face alignment network, capable of detecting points in both 2D and 3D coordinates.
 
-Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning based face alignment method. For detecting faces the library makes use of [dlib](http://dlib.net/) library.
+Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning based face alignment method. 
 
 <p align="center"><img src="docs/images/face-alignment-adrian.gif" /></p>
 
 **Note:** The lua version is available [here](https://github.com/1adrianb/2D-and-3D-face-alignment).
 
 For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
-
-**New retrained models will be posted at the end of november**
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment)
 
@@ -59,6 +57,27 @@ fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=F
 preds = fa.get_landmarks_from_directory('../test/assets/')
 ```
 
+#### Detect the landmarks using a specific face detector.
+
+By default the package will use the SFD face detector. However the users can alternatively use dlib or pre-existing ground truth bounding boxes.
+
+```python
+import face_alignment
+
+# sfd for SFD, dlib for Dlib and folder for existing bounding boxes.
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, face_detector='sfd')
+```
+
+### Running on CPU/GPU
+In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag:
+
+```python
+import face_alignment
+
+# cuda for CUDA
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, device='cpu')
+```
+
 Please also see the ``examples`` folder
 
 ## Installation
@@ -66,7 +85,7 @@ Please also see the ``examples`` folder
 ### Requirements
 
 * Python 3.5+ or Python 2.7 (it may work with other versions too)
-* Linux or macOS (windows may work once pytorch gets supported)
+* Linux, Windows or macOS
 * pytorch (>=0.4)
 
 While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
