@@ -107,7 +107,7 @@ class HourGlass(nn.Module):
     def _generate_network(self, level):
         self.add_module('b1_' + str(level), ConvBlock(self.features, self.features))
 
-        self.add_module('b2_' + str(level), ConvBlock(self.features, self.features)
+        self.add_module('b2_' + str(level), ConvBlock(self.features, self.features))
 
         if level > 1:
             self._generate_network(level - 1)
