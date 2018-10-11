@@ -10,7 +10,7 @@ Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning 
 
 For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment) [![Anaconda-Server Badge](https://anaconda.org/1adrianb/face_alignment/badges/version.svg)](https://anaconda.org/1adrianb/face_alignment)
 
 ## Features
 
@@ -68,7 +68,7 @@ import face_alignment
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, face_detector='sfd')
 ```
 
-### Running on CPU/GPU
+#### Running on CPU/GPU
 In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag:
 
 ```python
@@ -92,7 +92,9 @@ While not required, for optimal performance(especially for the detector) it is *
 
 ### Binaries
 
-Conda builds are coming soon!
+```bash
+conda install -c 1adrianb face_alignment
+```
 
 ### From source
 

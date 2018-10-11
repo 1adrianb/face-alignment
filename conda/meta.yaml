@@ -29,7 +29,7 @@ about:
   home: https://github.com/1adrianb/face-alignment
   license: BSD
   license_file: LICENSE
-  summary: A face alignment libray in python
+  summary: A 2D and 3D face alignment libray in python
 
 extra:
   recipe-maintainers:
