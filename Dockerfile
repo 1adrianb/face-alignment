@@ -1,5 +1,5 @@
 # Based on https://github.com/pytorch/pytorch/blob/master/Dockerfile
-FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04 
+FROM nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04 
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
          build-essential \
@@ -22,7 +22,7 @@ RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-la
 ENV PATH /opt/conda/bin:$PATH
 
 RUN conda config --set always_yes yes --set changeps1 no && conda update -q conda 
-RUN conda install pytorch torchvision cuda90 -c pytorch
+RUN conda install pytorch torchvision cuda92 -c pytorch
 
 # Install face-alignment package
 WORKDIR /workspace
