@@ -4,16 +4,18 @@ import torch
 
 from ..core import FaceDetector
 
+
 class FolderDetector(FaceDetector):
     '''This is a simple helper module that assumes the faces were detected already
         (either previously or are provided as ground truth).
 
-        The class expects to find the bounding boxes in the same format used by 
+        The class expects to find the bounding boxes in the same format used by
         the rest of face detectors, mainly ``list[(x1,y1,x2,y2),...]``.
-        For each image the detector will search for a file with the same name and with one of the 
+        For each image the detector will search for a file with the same name and with one of the
         following extensions: .npy, .t7 or .pth
 
     '''
+
     def __init__(self, device, path_to_detector=None, verbose=False):
         super(FolderDetector, self).__init__(device, verbose)
 
@@ -24,12 +26,12 @@ class FolderDetector(FaceDetector):
 
         base_name = os.path.splitext(tensor_or_path)[0]
 
-        if os.path.isfile(base_name+'.npy'):
-            detected_faces = np.load(base_name+'.npy')
-        elif os.path.isfile(base_name+'.t7'):
-            detected_faces = torch.load(base_name+'.t7')
-        elif os.path.isfile(base_name+'.pth'):
-            detected_faces = torch.load(base_name+'.pth')
+        if os.path.isfile(base_name + '.npy'):
+            detected_faces = np.load(base_name + '.npy')
+        elif os.path.isfile(base_name + '.t7'):
+            detected_faces = torch.load(base_name + '.t7')
+        elif os.path.isfile(base_name + '.pth'):
+            detected_faces = torch.load(base_name + '.pth')
         else:
             raise FileNotFoundError
 
@@ -49,4 +51,3 @@ class FolderDetector(FaceDetector):
     @property
     def reference_y_shift(self):
         return 0
- 

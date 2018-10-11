@@ -7,6 +7,7 @@ import math
 import numpy as np
 import cv2
 
+
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
         height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,
@@ -58,16 +59,16 @@ def draw_gaussian(image, point, sigma):
 def transform(point, center, scale, resolution, invert=False):
     """Generate and affine transformation matrix.
 
-    Given a set of points, a center, a scale and a targer resolution, the 
+    Given a set of points, a center, a scale and a targer resolution, the
     function generates and affine transformation matrix. If invert is ``True``
     it will produce the inverse transformation.
-    
+
     Arguments:
         point {torch.tensor} -- the input 2D point
         center {torch.tensor or numpy.array} -- the center around which to perform the transformations
         scale {float} -- the scale of the face/object
         resolution {float} -- the output resolution
-    
+
     Keyword Arguments:
         invert {bool} -- define wherever the function should produce the direct or the
         inverse transformation matrix (default: {False})
@@ -93,18 +94,18 @@ def transform(point, center, scale, resolution, invert=False):
 
 def crop(image, center, scale, resolution=256.0):
     """Center crops an image or set of heatmaps
-    
+
     Arguments:
         image {numpy.array} -- an rgb image
         center {numpy.array} -- the center of the object, usually the same as of the bounding box
         scale {float} -- scale of the face
-    
+
     Keyword Arguments:
         resolution {float} -- the size of the output cropped image (default: {256.0})
-    
+
     Returns:
         [type] -- [description]
-    """# Crop around the center point
+    """  # Crop around the center point
     """ Crops the image around the center. Input is expected to be an np.ndarray """
     ul = transform([1, 1], center, scale, resolution, True)
     br = transform([resolution, resolution], center, scale, resolution, True)
@@ -132,13 +133,13 @@ def crop(image, center, scale, resolution=256.0):
 
 
 def get_preds_fromhm(hm, center=None, scale=None):
-    """Obtain (x,y) coordinates given a set of N heatmaps. If the center 
-    and the scale is provided the function will return the points also in 
+    """Obtain (x,y) coordinates given a set of N heatmaps. If the center
+    and the scale is provided the function will return the points also in
     the original coordinate frame.
-    
+
     Arguments:
         hm {torch.tensor} -- the predicted heatmaps, of shape [B, N, W, H]
-    
+
     Keyword Arguments:
         center {torch.tensor} -- the center of the bounding box (default: {None})
         scale {float} -- face scale (default: {None})
@@ -175,11 +176,11 @@ def get_preds_fromhm(hm, center=None, scale=None):
 def shuffle_lr(parts, pairs=None):
     """Shuffle the points left-right according to the axis of symmetry
     of the object.
-    
+
     Arguments:
         parts {torch.tensor} -- a 3D or 4D object containing the
         heatmaps.
-    
+
     Keyword Arguments:
         pairs {list of integers} -- [order of the flipped points] (default: {None})
     """
@@ -199,10 +200,10 @@ def shuffle_lr(parts, pairs=None):
 
 def flip(tensor, is_label=False):
     """Flip an image or a set of heatmaps left-right
-    
+
     Arguments:
         tensor {numpy.array or torch.tensor} -- [the input image or heatmaps]
-    
+
     Keyword Arguments:
         is_label {bool} -- [denote wherever the input is an image or a set of heatmaps ] (default: {False})
     """
@@ -217,6 +218,8 @@ def flip(tensor, is_label=False):
     return tensor
 
 # From pyzolib/paths.py (https://bitbucket.org/pyzo/pyzolib/src/tip/paths.py)
+
+
 def appdata_dir(appname=None, roaming=False):
     """ appdata_dir(appname=None, roaming=False)
 

@@ -130,10 +130,10 @@ class FaceAlignment:
 
     def get_landmarks(self, image_or_path, detected_faces=None):
         """Deprecated, please use get_landmarks_from_image
-        
+
         Arguments:
             image_or_path {string or numpy.array or torch.tensor} -- The input image or path to it.
-        
+
         Keyword Arguments:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found in the image (default: {None})
         """
@@ -144,10 +144,10 @@ class FaceAlignment:
 
         This function predicts a set of 68 2D or 3D images, one for each image present.
         If detect_faces is None the method will also run a face detector.
-        
+
          Arguments:
             image_or_path {string or numpy.array or torch.tensor} -- The input image or path to it.
-        
+
         Keyword Arguments:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found in the image (default: {None})
         """

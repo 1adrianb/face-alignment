@@ -7,6 +7,8 @@ from setuptools import setup, find_packages
 from codecs import open
 
 # Function from: https://github.com/pytorch/vision/blob/master/setup.py
+
+
 def read(*names, **kwargs):
     with io.open(
         os.path.join(os.path.dirname(__file__), *names),
@@ -15,6 +17,8 @@ def read(*names, **kwargs):
         return fp.read()
 
 # Function from: https://github.com/pytorch/vision/blob/master/setup.py
+
+
 def find_version(*file_paths):
     version_file = read(*file_paths)
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
