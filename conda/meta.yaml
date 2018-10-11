@@ -8,8 +8,6 @@ source:
   path: ..
 
 build:
-  script_env:
-   - CONDA_BUILD_PATH
   number: 1
   noarch: python
   script: python setup.py install --single-version-externally-managed --record=record.txt
