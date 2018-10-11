@@ -18,11 +18,11 @@ requirements:
     - python
   run:
     - python
-    - torch
+    - pytorch
     - numpy
     - scikit-image
     - scipy
-    - opencv-python
+    - opencv
 
 about:
   home: https://github.com/1adrianb/face-alignment
