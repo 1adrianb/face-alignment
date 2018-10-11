@@ -8,9 +8,11 @@ source:
   path: ..
 
 build:
+  script_env:
+   - CONDA_BUILD_PATH
   number: 1
   noarch: generic
-  scipt: python setup.py install --single-version-externally-managed --record=record.txt
+  script: python setup.py install --single-version-externally-managed --record=record.txt
 
 requirements:
   build:
@@ -23,6 +25,7 @@ requirements:
     - scikit-image
     - scipy
     - opencv
+    - tqdm
 
 about:
   home: https://github.com/1adrianb/face-alignment
