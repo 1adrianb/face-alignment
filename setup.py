@@ -30,7 +30,7 @@ def find_version(*file_paths):
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
+with open(path.join(here, 'README.md'), encoding='utf-8') as readme_file:
     long_description = readme_file.read()
 
 VERSION = find_version('face_alignment', '__init__.py')
@@ -51,6 +51,7 @@ setup(
 
     description="Detector 2D or 3D face landmarks from Python",
     long_description=long_description,
+    long_description_content_type="text/markdown",
 
     # Author details
     author="Adrian Bulat",
@@ -65,9 +66,9 @@ setup(
     zip_safe=True,
 
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
+        'Development Status :: 5 - Production/Stable',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
 
         # Supported python versions
