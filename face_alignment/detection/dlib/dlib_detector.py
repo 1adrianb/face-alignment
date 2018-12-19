@@ -15,6 +15,7 @@ class DlibDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, verbose=False):
         super().__init__(device, verbose)
 
+        print('Warning: this detector is deprecated. Please use a different one, i.e.: S3FD.')
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
 
         # Initialise the face detector

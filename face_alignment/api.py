@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 import torch
+from torch.utils.model_zoo import load_url
 from enum import Enum
 from skimage import io
 from skimage import color
@@ -42,6 +43,12 @@ class NetworkSize(Enum):
     def __int__(self):
         return self.value
 
+models_urls = {
+    '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4-11f355bf06.pth.tar',
+    '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4-7835d9f11d.pth.tar',
+    'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth-2a464da4ea.pth.tar',
+}
+
 
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
@@ -50,12 +57,8 @@ class FaceAlignment:
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         self.verbose = verbose
-        base_path = os.path.join(appdata_dir('face_alignment'), "data")
 
         network_size = int(network_size)
-
-        if not os.path.exists(base_path):
-            os.makedirs(base_path)
 
         if 'cuda' in device:
             torch.backends.cudnn.benchmark = True
@@ -68,30 +71,11 @@ class FaceAlignment:
         # Initialise the face alignemnt networks
         self.face_alignment_net = FAN(network_size)
         if landmarks_type == LandmarksType._2D:
-            network_name = '2DFAN-' + str(network_size) + '.pth.tar'
+            network_name = '2DFAN-' + str(network_size)
         else:
-            network_name = '3DFAN-' + str(network_size) + '.pth.tar'
-        fan_path = os.path.join(base_path, network_name)
+            network_name = '3DFAN-' + str(network_size)
 
-        if not os.path.isfile(fan_path):
-            print("Downloading the Face Alignment Network(FAN). Please wait...")
-
-            fan_temp_path = os.path.join(base_path, network_name + '.download')
-
-            if os.path.isfile(fan_temp_path):
-                os.remove(os.path.join(fan_temp_path))
-
-            request_file.urlretrieve(
-                "https://www.adrianbulat.com/downloads/python-fan/" +
-                network_name, os.path.join(fan_temp_path))
-
-            os.rename(os.path.join(fan_temp_path), os.path.join(fan_path))
-
-        fan_weights = torch.load(
-            fan_path,
-            map_location=lambda storage,
-            loc: storage)
-
+        fan_weights = load_url(models_urls[network_name], map_location=lambda storage, loc: storage)
         self.face_alignment_net.load_state_dict(fan_weights)
 
         self.face_alignment_net.to(device)
@@ -100,26 +84,8 @@ class FaceAlignment:
         # Initialiase the depth prediciton network
         if landmarks_type == LandmarksType._3D:
             self.depth_prediciton_net = ResNetDepth()
-            depth_model_path = os.path.join(base_path, 'depth.pth.tar')
-            if not os.path.isfile(depth_model_path):
-                print(
-                    "Downloading the Face Alignment depth Network (FAN-D). Please wait...")
 
-                depth_model_temp_path = os.path.join(base_path, 'depth.pth.tar.download')
-
-                if os.path.isfile(depth_model_temp_path):
-                    os.remove(os.path.join(depth_model_temp_path))
-
-                request_file.urlretrieve(
-                    "https://www.adrianbulat.com/downloads/python-fan/depth.pth.tar",
-                    os.path.join(depth_model_temp_path))
-
-                os.rename(os.path.join(depth_model_temp_path), os.path.join(depth_model_path))
-
-            depth_weights = torch.load(
-                depth_model_path,
-                map_location=lambda storage,
-                loc: storage)
+            depth_weights = load_url(models_urls['depth'], map_location=lambda storage, loc: storage)
             depth_dict = {
                 k.replace('module.', ''): v for k,
                 v in depth_weights['state_dict'].items()}
@@ -178,11 +144,11 @@ class FaceAlignment:
         landmarks = []
         for i, d in enumerate(detected_faces):
             center = torch.FloatTensor(
-                [d[2] - (d[2] - d[0]) / 2.0, d[3] -
-                 (d[3] - d[1]) / 2.0])
+                [d[2] - (d[2] - d[0]) / 2.0, d[3]
+                 - (d[3] - d[1]) / 2.0])
             center[1] = center[1] - (d[3] - d[1]) * 0.12
-            scale = (d[2] - d[0] +
-                     d[3] - d[1]) / self.face_detector.reference_scale
+            scale = (d[2] - d[0]
+                     + d[3] - d[1]) / self.face_detector.reference_scale
 
             inp = crop(image, center, scale)
             inp = torch.from_numpy(inp.transpose(

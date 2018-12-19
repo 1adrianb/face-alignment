@@ -87,7 +87,7 @@ Please also see the ``examples`` folder
 
 * Python 3.5+ or Python 2.7 (it may work with other versions too)
 * Linux, Windows or macOS
-* pytorch (>=0.4)
+* pytorch (>=1.0)
 
 While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
 
