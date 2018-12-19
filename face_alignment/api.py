@@ -144,11 +144,9 @@ class FaceAlignment:
         landmarks = []
         for i, d in enumerate(detected_faces):
             center = torch.FloatTensor(
-                [d[2] - (d[2] - d[0]) / 2.0, d[3]
-                 - (d[3] - d[1]) / 2.0])
+                [d[2] - (d[2] - d[0]) / 2.0, d[3] - (d[3] - d[1]) / 2.0])
             center[1] = center[1] - (d[3] - d[1]) * 0.12
-            scale = (d[2] - d[0]
-                     + d[3] - d[1]) / self.face_detector.reference_scale
+            scale = (d[2] - d[0] + d[3] - d[1]) / self.face_detector.reference_scale
 
             inp = crop(image, center, scale)
             inp = torch.from_numpy(inp.transpose(
