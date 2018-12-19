@@ -39,7 +39,7 @@ install:
 # Upload the new version to conda, if successful 
 after_success:
   if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] &&
-     ([ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "$TRAVIS_TAG" ]) &&
+     ([ "$TRAVIS_BRANCH" == "master" ]  &&
       [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       conda install conda-build && conda install anaconda-client && bash conda/conda_upload.sh; 
   fi
