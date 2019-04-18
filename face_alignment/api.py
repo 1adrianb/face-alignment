@@ -181,7 +181,7 @@ class FaceAlignment:
 
             landmarks.append(pts_img.numpy())
 
-        return landmarks
+        return detected_faces,landmarks
 
     def get_landmarks_from_directory(self, path, extensions=['.jpg', '.png'], recursive=True, show_progress_bar=True):
         detected_faces = self.face_detector.detect_from_directory(path, extensions, recursive, show_progress_bar)
