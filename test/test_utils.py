@@ -1,3 +1,5 @@
+import sys
+sys.path.append('.')
 import unittest
 from face_alignment.utils import *
 import numpy as np
@@ -31,6 +33,18 @@ class Tester(unittest.TestCase):
         preds, _ = get_preds_fromhm(heatmaps)
 
         assert np.allclose(pts.numpy(), preds.numpy(), atol=5)
+
+    def test_create_heatmaps(self):
+        reference_scale = 195
+        target_landmarks = torch.randint(0, 255, (1, 68, 2)).type(torch.float)  # simulated dataset
+        bb = create_bounding_box(target_landmarks)
+        centers = torch.stack([bb[:, 2] - (bb[:, 2] - bb[:, 0]) / 2.0, bb[:, 3] - (bb[:, 3] - bb[:, 1]) / 2.0], dim=1)
+        centers[:, 1] = centers[:, 1] - (bb[:, 3] - bb[:, 1]) * 0.12  # Not sure where 0.12 comes from
+        scales = (bb[:, 2] - bb[:, 0] + bb[:, 3] - bb[:, 1]) / reference_scale
+        heatmaps = create_target_heatmap(target_landmarks, centers, scales)
+        preds = get_preds_fromhm(heatmaps, centers.squeeze(), scales.squeeze())[1]
+
+        assert np.allclose(preds.numpy(), target_landmarks.numpy(), atol=5)
 
 if __name__ == '__main__':
     unittest.main()
