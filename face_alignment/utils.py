@@ -170,6 +170,38 @@ def get_preds_fromhm(hm, center=None, scale=None):
     return preds, preds_orig
 
 
+def create_target_heatmap(target_landmarks, centers, scales):
+    heatmaps = np.zeros((target_landmarks.shape[0], 68, 64, 64), dtype=np.float32)
+    for i in range(heatmaps.shape[0]):
+        for p in range(68):
+            landmark_cropped_coor = transform(target_landmarks[i, p] + 1, centers[i], scales[i], 64, invert=False)
+            heatmaps[i, p] = draw_gaussian(heatmaps[i, p], landmark_cropped_coor + 1, 1)
+    return torch.tensor(heatmaps)
+
+
+def create_bounding_box(target_landmarks, expansion_factor=0.0):
+    """
+    gets a batch of landmarks and calculates a bounding box that includes all the landmarks per set of landmarks in
+    the batch
+    :param target_landmarks: batch of landmarks of dim (n x 68 x 2). Where n is the batch size
+    :param expansion_factor: expands the bounding box by this factor. For example, a `expansion_factor` of 0.2 leads
+    to 20% increase in width and height of the boxes
+    :return: a batch of bounding boxes of dim (n x 4) where the second dim is (x1,y1,x2,y2)
+    """
+    # Calc bounding box
+    x_y_min, _ = target_landmarks.reshape(-1, 68, 2).min(dim=1)
+    x_y_max, _ = target_landmarks.reshape(-1, 68, 2).max(dim=1)
+    # expanding the bounding box
+    expansion_factor /= 2
+    bb_expansion_x = (x_y_max[:, 0] - x_y_min[:, 0]) * expansion_factor
+    bb_expansion_y = (x_y_max[:, 1] - x_y_min[:, 1]) * expansion_factor
+    x_y_min[:, 0] -= bb_expansion_x
+    x_y_max[:, 0] += bb_expansion_x
+    x_y_min[:, 1] -= bb_expansion_y
+    x_y_max[:, 1] += bb_expansion_y
+    return torch.cat([x_y_min, x_y_max], dim=1)
+
+
 def shuffle_lr(parts, pairs=None):
     """Shuffle the points left-right according to the axis of symmetry
     of the object.
