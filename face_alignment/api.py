@@ -125,9 +125,12 @@ class FaceAlignment:
             except IOError:
                 print("error opening file :: ", image_or_path)
                 return None
+        elif isinstance(image_or_path, torch.Tensor):
+            image = image_or_path.detach().cpu().numpy()
         else:
             image = image_or_path
-
+            
+            
         if image.ndim == 2:
             image = color.gray2rgb(image)
         elif image.ndim == 4:
