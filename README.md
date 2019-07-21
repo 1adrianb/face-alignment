@@ -27,8 +27,8 @@ from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
 
-input = io.imread('../test/assets/aflw-test.jpg')
-preds = fa.get_landmarks(input)
+input_img = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.get_landmarks(input_img)
 ```
 
 #### Detect 3D facial landmarks in pictures
@@ -43,8 +43,8 @@ from skimage import io
 
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, flip_input=False)
 
-input = io.imread('../test/assets/aflw-test.jpg')
-preds = fa.get_landmarks(input)
+input_img = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.get_landmarks(input_img)
 ```
 
 #### Process an entire directory in one go
