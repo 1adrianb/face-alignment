@@ -106,6 +106,7 @@ class FaceAlignment:
         """
         return self.get_landmarks_from_image(image_or_path, detected_faces)
 
+    @torch.no_grad()
     def get_landmarks_from_image(self, image_or_path, detected_faces=None):
         """Predict the landmarks for each face present in the image.
 
@@ -143,7 +144,6 @@ class FaceAlignment:
             print("Warning: No faces were detected.")
             return None
 
-        torch.set_grad_enabled(False)
         landmarks = []
         for i, d in enumerate(detected_faces):
             center = torch.FloatTensor(
