@@ -130,8 +130,7 @@ class FaceAlignment:
             image = image_or_path.detach().cpu().numpy()
         else:
             image = image_or_path
-            
-            
+
         if image.ndim == 2:
             image = color.gray2rgb(image)
         elif image.ndim == 4:
