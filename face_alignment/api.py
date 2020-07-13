@@ -185,6 +185,83 @@ class FaceAlignment:
 
         return landmarks
 
+    @torch.no_grad()
+    def get_landmarks_from_batch(self, image_batch, detected_faces=None):
+        """Predict the landmarks for each face present in the image.
+
+        This function predicts a set of 68 2D or 3D images, one for each image in a batch in parallel.
+        If detect_faces is None the method will also run a face detector.
+
+         Arguments:
+            image_batch {torch.tensor} -- The input images batch
+
+        Keyword Arguments:
+            detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
+            in the image (default: {None})
+        """
+
+        if detected_faces is None:
+            detected_faces = self.face_detector.detect_from_batch(image_batch)
+
+        print(detected_faces)
+
+        if len(detected_faces) == 0:
+            print("Warning: No faces were detected.")
+            return None
+
+        landmarks = []
+        inp_batch = []
+        # print(detected_faces)
+        for i, d in enumerate(detected_faces):
+            center = torch.FloatTensor(
+                [d[2] - (d[2] - d[0]) / 2.0, d[3] - (d[3] - d[1]) / 2.0])
+            center[1] = center[1] - (d[3] - d[1]) * 0.12
+            scale = (d[2] - d[0] + d[3] - d[1]) / self.face_detector.reference_scale
+            image = image_batch[i].cpu().numpy()
+            # print(image.shape)
+            image = image.transpose(1, 2, 0)
+
+            inp = crop(image, center, scale)
+            inp = torch.from_numpy(inp.transpose(
+                (2, 0, 1))).float()
+
+            inp = inp.to(self.device)
+            inp.div_(255.0).unsqueeze_(0)
+            inp_batch.append(inp)
+
+        print(len(inp_batch))
+        inp_batch = torch.cat(inp_batch, dim=0)
+        print(inp_batch.shape)
+        out = self.face_alignment_net(inp_batch)[-1].detach()
+        if self.flip_input:
+            out += flip(self.face_alignment_net(flip(inp_batch))
+                        [-1].detach(), is_label=True)
+        out = out.cpu()
+        print(out.shape)
+        pts, pts_img = get_preds_fromhm(out, center, scale)
+        print(pts.shape)
+        pts, pts_img = pts.view(-1, 68, 2) * 4, pts_img.view(-1, 68, 2)
+
+        # TODO: Adding 3D landmark support
+        if self.landmarks_type == LandmarksType._3D:
+            heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
+            for i in range(68):
+                if pts[i, 0] > 0:
+                    heatmaps[i] = draw_gaussian(
+                        heatmaps[i], pts[i], 2)
+            heatmaps = torch.from_numpy(
+                heatmaps).unsqueeze_(0)
+
+            heatmaps = heatmaps.to(self.device)
+            depth_pred = self.depth_prediciton_net(
+                torch.cat((inp, heatmaps), 1)).data.cpu().view(68, 1)
+            pts_img = torch.cat(
+                (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
+
+        landmarks.append(pts_img.numpy())
+
+        return landmarks
+
     def get_landmarks_from_directory(self, path, extensions=['.jpg', '.png'], recursive=True, show_progress_bar=True):
         detected_faces = self.face_detector.detect_from_directory(path, extensions, recursive, show_progress_bar)
 
