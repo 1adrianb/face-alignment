@@ -203,8 +203,6 @@ class FaceAlignment:
         if detected_faces is None:
             detected_faces = self.face_detector.detect_from_batch(image_batch)
 
-        print(detected_faces)
-
         if len(detected_faces) == 0:
             print("Warning: No faces were detected.")
             return None
@@ -229,17 +227,14 @@ class FaceAlignment:
             inp.div_(255.0).unsqueeze_(0)
             inp_batch.append(inp)
 
-        print(len(inp_batch))
         inp_batch = torch.cat(inp_batch, dim=0)
-        print(inp_batch.shape)
+
         out = self.face_alignment_net(inp_batch)[-1].detach()
         if self.flip_input:
             out += flip(self.face_alignment_net(flip(inp_batch))
                         [-1].detach(), is_label=True)
         out = out.cpu()
-        print(out.shape)
         pts, pts_img = get_preds_fromhm(out, center, scale)
-        print(pts.shape)
         pts, pts_img = pts.view(-1, 68, 2) * 4, pts_img.view(-1, 68, 2)
 
         # TODO: Adding 3D landmark support
