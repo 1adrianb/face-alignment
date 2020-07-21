@@ -52,6 +52,27 @@ class FaceDetector(object):
         """
         raise NotImplementedError
 
+    def detect_from_batch(self, tensor):
+        """Detects faces in a given image.
+
+        This function detects the faces present in a provided BGR(usually)
+        image. The input can be either the image itself or the path to it.
+
+        Arguments:
+            tensor {torch.tensor} -- image batch tensor.
+
+        Example::
+
+            >>> path_to_image = 'data/image_01.jpg'
+            ...   detected_faces = detect_from_image(path_to_image)
+            [A list of bounding boxes (x1, y1, x2, y2)]
+            >>> image = cv2.imread(path_to_image)
+            ...   detected_faces = detect_from_image(image)
+            [A list of bounding boxes (x1, y1, x2, y2)]
+
+        """
+        raise NotImplementedError
+
     def detect_from_directory(self, path, extensions=['.jpg', '.png'], recursive=False, show_progress_bar=True):
         """Detects faces from all the images present in a given directory.
 
