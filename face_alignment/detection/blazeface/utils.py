@@ -38,7 +38,7 @@ def resize_and_crop_image(image, dim):
     if image.shape[0] > image.shape[1]:
         img = image_resize(image, width=dim)
         yshift, xshift = (image.shape[0] - image.shape[1]) // 2, 0
-        y_start = (img.shape[1] - img.shape[0]) // 2
+        y_start = (img.shape[0] - img.shape[1]) // 2
         y_end = y_start + dim
         return img[y_start:y_end, :, :], (xshift, yshift)
     else:
