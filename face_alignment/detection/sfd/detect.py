@@ -42,7 +42,7 @@ def batch_detect(net, img_batch, device):
     BB, CC, HH, WW = img_batch.size()
 
     with torch.no_grad():
-        olist = net(img_batch)
+        olist = net(img_batch.float()) # patched uint8_t overflow error
 
     for i in range(len(olist) // 2):
         olist[i * 2] = F.softmax(olist[i * 2], dim=1)
