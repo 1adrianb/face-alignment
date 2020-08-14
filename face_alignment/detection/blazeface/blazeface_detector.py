@@ -37,7 +37,7 @@ class BlazeFaceDetector(FaceDetector):
 
         self.face_detector = BlazeFace()
         self.face_detector.load_state_dict(model_weights)
-        self.face_detector.load_anchors_from_npy(model_anchors)
+        self.face_detector.load_anchors_from_npy(model_anchors, device)
 
         # Optionally change the thresholds:
         self.face_detector.min_score_thresh = 0.5

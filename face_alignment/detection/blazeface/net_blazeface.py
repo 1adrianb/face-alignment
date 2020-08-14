@@ -156,16 +156,18 @@ class BlazeFace(nn.Module):
         self.load_state_dict(torch.load(path))
         self.eval()
 
-    def load_anchors(self, path):
+    def load_anchors(self, path, device=None):
+        device = device or self._device()
         self.anchors = torch.tensor(
-            np.load(path), dtype=torch.float32, device=self._device())
+            np.load(path), dtype=torch.float32, device=device)
         assert(self.anchors.ndimension() == 2)
         assert(self.anchors.shape[0] == self.num_anchors)
         assert(self.anchors.shape[1] == 4)
 
-    def load_anchors_from_npy(self, arr):
+    def load_anchors_from_npy(self, arr, device=None):
+        device = device or self._device()
         self.anchors = torch.tensor(
-            arr, dtype=torch.float32, device=self._device())
+            arr, dtype=torch.float32, device=device)
         assert(self.anchors.ndimension() == 2)
         assert(self.anchors.shape[0] == self.num_anchors)
         assert(self.anchors.shape[1] == 4)
@@ -275,7 +277,7 @@ class BlazeFace(nn.Module):
         for i in range(raw_box_tensor.shape[0]):
             boxes = detection_boxes[i, mask[i]]
             scores = detection_scores[i, mask[i]].unsqueeze(dim=-1)
-            output_detections.append(torch.cat((boxes, scores), dim=-1))
+            output_detections.append(torch.cat((boxes, scores), dim=-1).to('cpu'))
 
         return output_detections
 
