@@ -1,6 +1,7 @@
 import os
 import cv2
 import dlib
+import logging
 
 try:
     import urllib.request as request_file
@@ -14,8 +15,8 @@ from ...utils import appdata_dir
 class DlibDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, verbose=False):
         super().__init__(device, verbose)
-
-        print('Warning: this detector is deprecated. Please use a different one, i.e.: S3FD.')
+        logger = logging.getLogger(__name__)
+        logger.warning('this detector is deprecated. Please use a different one, i.e.: S3FD.')
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
 
         # Initialise the face detector

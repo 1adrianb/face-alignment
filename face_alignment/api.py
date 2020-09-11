@@ -11,6 +11,7 @@ try:
     import urllib.request as request_file
 except BaseException:
     import urllib as request_file
+import logging
 
 from .models import FAN, ResNetDepth
 from .utils import *
@@ -57,6 +58,7 @@ class FaceAlignment:
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         self.verbose = verbose
+        self.logger = logging.getLogger(__name__)
 
         network_size = int(network_size)
 
@@ -140,7 +142,7 @@ class FaceAlignment:
             detected_faces = self.face_detector.detect_from_image(image[..., ::-1].copy())
 
         if len(detected_faces) == 0:
-            print("Warning: No faces were detected.")
+            self.logger.warning("No faces were detected.")
             return None
 
         landmarks = []
@@ -204,7 +206,7 @@ class FaceAlignment:
             detected_faces = self.face_detector.detect_from_batch(image_batch)
 
         if len(detected_faces) == 0:
-            print("Warning: No faces were detected.")
+            self.logger.warning("No faces were detected.")
             return None
 
         landmarks = []
