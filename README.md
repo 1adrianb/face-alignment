@@ -85,7 +85,7 @@ Please also see the ``examples`` folder
 
 ### Requirements
 
-* Python 3.5+ or Python 2.7 (it may work with other versions too)
+* Python 3.5+ or Python 2.7 (it may work with other versions too). Support for Python 2.7 is deprecated.
 * Linux, Windows or macOS
 * pytorch (>=1.0)
 
