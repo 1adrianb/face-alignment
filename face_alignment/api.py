@@ -230,14 +230,14 @@ class FaceAlignment:
 
                 out = self.face_alignment_net(inp)[-1].detach()
                 if self.flip_input:
-                    out += flip(self.face_alignment_net(flip(inp_batch))
-                                [-1].detach(), is_label=True)
+                    out += flip(self.face_alignment_net(flip(inp))
+                                [-1].detach(), is_label=True)  # patched inp_batch undefined variable error
                 out = out.cpu()
                 pts, pts_img = get_preds_fromhm(out, center, scale)
-                pts, pts_img = pts.view(-1, 68, 2) * 4, pts_img.view(-1, 68, 2)
 
-                # TODO: Adding 3D landmark support
+                # Added 3D landmark support
                 if self.landmarks_type == LandmarksType._3D:
+                    pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
                     heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
                     for i in range(68):
                         if pts[i, 0] > 0:
@@ -251,7 +251,8 @@ class FaceAlignment:
                         torch.cat((inp, heatmaps), 1)).data.cpu().view(68, 1)
                     pts_img = torch.cat(
                         (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
-
+                else:
+                    pts, pts_img = pts.view(-1, 68, 2) * 4, pts_img.view(-1, 68, 2)
                 landmark_set.append(pts_img.numpy())
 
             landmark_set = np.concatenate(landmark_set, axis=0)

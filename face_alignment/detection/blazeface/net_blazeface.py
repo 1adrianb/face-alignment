@@ -45,14 +45,14 @@ class BlazeBlock(nn.Module):
 class BlazeFace(nn.Module):
     """The BlazeFace face detection model from MediaPipe.
 
-    The version from MediaPipe is simpler than the one in the paper; 
+    The version from MediaPipe is simpler than the one in the paper;
     it does not use the "double" BlazeBlocks.
 
     Because we won't be training this model, it doesn't need to have
-    batchnorm layers. These have already been "folded" into the conv 
+    batchnorm layers. These have already been "folded" into the conv
     weights by TFLite.
 
-    The conversion to PyTorch is fairly straightforward, but there are 
+    The conversion to PyTorch is fairly straightforward, but there are
     some small differences between TFLite and PyTorch in how they handle
     padding on conv layers with stride 2.
 
@@ -156,16 +156,18 @@ class BlazeFace(nn.Module):
         self.load_state_dict(torch.load(path))
         self.eval()
 
-    def load_anchors(self, path):
+    def load_anchors(self, path, device=None):
+        device = device or self._device()
         self.anchors = torch.tensor(
-            np.load(path), dtype=torch.float32, device=self._device())
+            np.load(path), dtype=torch.float32, device=device)
         assert(self.anchors.ndimension() == 2)
         assert(self.anchors.shape[0] == self.num_anchors)
         assert(self.anchors.shape[1] == 4)
 
-    def load_anchors_from_npy(self, arr):
+    def load_anchors_from_npy(self, arr, device=None):
+        device = device or self._device()
         self.anchors = torch.tensor(
-            arr, dtype=torch.float32, device=self._device())
+            arr, dtype=torch.float32, device=device)
         assert(self.anchors.ndimension() == 2)
         assert(self.anchors.shape[0] == self.num_anchors)
         assert(self.anchors.shape[1] == 4)
@@ -179,7 +181,7 @@ class BlazeFace(nn.Module):
 
         Arguments:
             img: a NumPy array of shape (H, W, 3) or a PyTorch tensor of
-                 shape (3, H, W). The image's height and width should be 
+                 shape (3, H, W). The image's height and width should be
                  128 pixels.
 
         Returns:
@@ -198,7 +200,7 @@ class BlazeFace(nn.Module):
                shape (b, 3, H, W). The height and width should be 128 pixels.
 
         Returns:
-            A list containing a tensor of face detections for each image in 
+            A list containing a tensor of face detections for each image in
             the batch. If no faces are found for an image, returns a tensor
             of shape (0, 17).
 
@@ -237,7 +239,7 @@ class BlazeFace(nn.Module):
 
     def _tensors_to_detections(self, raw_box_tensor, raw_score_tensor, anchors):
         """The output of the neural network is a tensor of shape (b, 896, 16)
-        containing the bounding box regressor predictions, as well as a tensor 
+        containing the bounding box regressor predictions, as well as a tensor
         of shape (b, 896, 1) with the classification confidences.
 
         This function converts these two "raw" tensors into proper detections.
@@ -275,7 +277,7 @@ class BlazeFace(nn.Module):
         for i in range(raw_box_tensor.shape[0]):
             boxes = detection_boxes[i, mask[i]]
             scores = detection_scores[i, mask[i]].unsqueeze(dim=-1)
-            output_detections.append(torch.cat((boxes, scores), dim=-1))
+            output_detections.append(torch.cat((boxes, scores), dim=-1).to('cpu'))
 
         return output_detections
 
@@ -404,10 +406,10 @@ def jaccard(box_a, box_b):
         jaccard overlap: (tensor) Shape: [box_a.size(0), box_b.size(0)]
     """
     inter = intersect(box_a, box_b)
-    area_a = ((box_a[:, 2] - box_a[:, 0]) *
-              (box_a[:, 3] - box_a[:, 1])).unsqueeze(1).expand_as(inter)  # [A,B]
-    area_b = ((box_b[:, 2] - box_b[:, 0]) *
-              (box_b[:, 3] - box_b[:, 1])).unsqueeze(0).expand_as(inter)  # [A,B]
+    area_a = ((box_a[:, 2] - box_a[:, 0])
+              * (box_a[:, 3] - box_a[:, 1])).unsqueeze(1).expand_as(inter)  # [A,B]
+    area_b = ((box_b[:, 2] - box_b[:, 0])
+              * (box_b[:, 3] - box_b[:, 1])).unsqueeze(0).expand_as(inter)  # [A,B]
     union = area_a + area_b - inter
     return inter / union  # [A,B]
 
