@@ -60,7 +60,7 @@ preds = fa.get_landmarks_from_directory('../test/assets/')
 
 #### Detect the landmarks using a specific face detector.
 
-By default the package will use the SFD face detector. However the users can alternatively use dlib or pre-existing ground truth bounding boxes.
+By default the package will use the SFD face detector. However the users can alternatively use dlib, BlazeFace, or pre-existing ground truth bounding boxes.
 
 ```python
 import face_alignment
