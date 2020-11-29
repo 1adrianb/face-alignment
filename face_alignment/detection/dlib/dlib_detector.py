@@ -17,6 +17,7 @@ class DlibDetector(FaceDetector):
 
         print('Warning: this detector is deprecated. Please use a different one, i.e.: S3FD.')
         base_path = os.path.join(appdata_dir('face_alignment'), "data")
+        os.makedirs(base_path, exist_ok=True)
 
         # Initialise the face detector
         if 'cuda' in device:
