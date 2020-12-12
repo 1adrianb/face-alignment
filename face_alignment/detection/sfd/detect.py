@@ -69,7 +69,8 @@ def batch_detect(net, img_batch, device):
                 x1, y1, x2, y2 = box[0] * 1.0
                 bboxlist.append([x1, y1, x2, y2, score])
 
-        bboxlists.append(bboxlist)
+        if 0 < len(bboxlist):
+            bboxlists.append(bboxlist)
 
     bboxlists = np.array(bboxlists)
 
