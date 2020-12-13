@@ -169,7 +169,7 @@ class FaceAlignment:
             if self.landmarks_type == LandmarksType._3D:
                 heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
                 for i in range(68):
-                    if pts[i, 0] > 0:
+                    if pts[i, 0] > 0 and pts[i, 1] > 0:
                         heatmaps[i] = draw_gaussian(
                             heatmaps[i], pts[i], 2)
                 heatmaps = torch.from_numpy(
