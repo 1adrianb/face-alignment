@@ -85,7 +85,7 @@ Please also see the ``examples`` folder
 
 ### Requirements
 
-* Python 3.5+ or Python 2.7 (it may work with other versions too). Support for Python 2.7 is deprecated.
+* Python 3.5+ (it may work with other versions too).
 * Linux, Windows or macOS
 * pytorch (>=1.0)
 
@@ -104,39 +104,7 @@ Alternatively, bellow, you can find instruction to build it from source.
 
 ### From source
 
- Install pytorch and pytorch dependencies. Instructions taken from [pytorch readme](https://github.com/pytorch/pytorch). For a more updated version check the framework github page.
-
- On Linux
-```bash
-export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" # [anaconda root directory]
-
-# Install basic dependencies
-conda install numpy pyyaml mkl setuptools cmake gcc cffi
-
-# Add LAPACK support for the GPU
-conda install -c soumith magma-cuda80 # or magma-cuda75 if CUDA 7.5
-```
-
-On OSX
-```bash
-export CMAKE_PREFIX_PATH=[anaconda root directory]
-conda install numpy pyyaml setuptools cmake cffi
-```
-#### Get the PyTorch source
-```bash
-git clone --recursive https://github.com/pytorch/pytorch
-```
-
-#### Install PyTorch
-On Linux
-```bash
-python setup.py install
-```
-
-On OSX
-```bash
-MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py install
-```
+ Install pytorch and pytorch dependencies. Please check the [pytorch readme](https://github.com/pytorch/pytorch) for this.
 
 #### Get the Face Alignment source code
 ```bash
@@ -150,7 +118,7 @@ python setup.py install
 
 ### Docker image
 
-A Dockerfile is provided to build images with cuda support and cudnn v5. For more instructions about running and building a docker image check the orginal Docker documentation.
+A Dockerfile is provided to build images with cuda support and cudnn. For more instructions about running and building a docker image check the orginal Docker documentation.
 ```
 docker build -t face-alignment .
 ```
@@ -175,9 +143,3 @@ All contributions are welcomed. If you encounter any issue (including examples o
 ```
 
 For citing dlib, pytorch or any other packages used here please check the original page of their respective authors.
-
-## Acknowledgements
-
-* To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
-* To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
-* To all other python developers that made available the rest of the packages used in this repository.

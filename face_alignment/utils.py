@@ -249,7 +249,7 @@ def flip(tensor, is_label=False):
 
 
 # Pytorch load supports only pytorch models
-def load_file_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None):
+def load_file_from_url(url, model_dir=None, progress=True, check_hash=False, file_name=None):
     if model_dir is None:
         hub_dir = get_dir()
         model_dir = os.path.join(hub_dir, 'checkpoints')
