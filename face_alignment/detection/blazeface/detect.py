@@ -1,20 +1,10 @@
 import torch
 import torch.nn.functional as F
 
-import os
-import sys
 import cv2
-import random
-import datetime
-import math
-import argparse
 import numpy as np
 
-import scipy.io as sio
-import zipfile
-
 from .utils import *
-# from .net_blazeface import s3fd
 
 
 def detect(net, img, device):
