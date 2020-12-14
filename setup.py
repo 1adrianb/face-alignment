@@ -55,7 +55,7 @@ setup(
 
     # Author details
     author="Adrian Bulat",
-    author_email="adrian.bulat@nottingham.ac.uk",
+    author_email="adrian@adrianbulat.com",
     url="https://github.com/1adrianb/face-alignment",
 
     # Package info
