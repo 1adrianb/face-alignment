@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 import torch
 from torch.utils.model_zoo import load_url
