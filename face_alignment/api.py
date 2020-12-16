@@ -247,8 +247,8 @@ class FaceAlignment:
                 else:
                     pts, pts_img = pts.view(-1, 68, 2) * 4, pts_img.view(-1, 68, 2)
                 landmark_set.append(pts_img.numpy())
-
-            landmark_set = np.concatenate(landmark_set, axis=0)
+            if 0 != len(landmark_set):
+                landmark_set = np.concatenate(landmark_set, axis=0)
             landmarks.append(landmark_set)
         return landmarks
 
