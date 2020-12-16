@@ -85,7 +85,7 @@ Please also see the ``examples`` folder
 
 ### Requirements
 
-* Python 3.5+ (it may work with other versions too).
+* Python 3.5+ (it may work with other versions too). Last version with support for python 2.7 was v1.1.1
 * Linux, Windows or macOS
 * pytorch (>=1.0)
 
@@ -129,7 +129,7 @@ While here the work is presented as a black-box, if you want to know more about 
 
 ## Contributions
 
-All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue.
+All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue. If you plan to add a new features please open an issue to discuss this prior to making a pull request.
 
 ## Citation
 
@@ -143,3 +143,9 @@ All contributions are welcomed. If you encounter any issue (including examples o
 ```
 
 For citing dlib, pytorch or any other packages used here please check the original page of their respective authors.
+
+## Acknowledgements
+
+* To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
+* To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
+* To all other python developers that made available the rest of the packages used in this repository.
