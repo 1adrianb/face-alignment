@@ -1,11 +1,17 @@
-from __future__ import print_function
 import os
 import sys
-import time
+import errno
 import torch
 import math
 import numpy as np
 import cv2
+
+from urllib.parse import urlparse
+from torch.hub import download_url_to_file, HASH_REGEX
+try:
+    from torch.hub import get_dir
+except BaseException:
+    from torch.hub import _get_torch_home as get_dir
 
 
 def _gaussian(
@@ -246,61 +252,34 @@ def flip(tensor, is_label=False):
 
     return tensor
 
-# From pyzolib/paths.py (https://bitbucket.org/pyzo/pyzolib/src/tip/paths.py)
 
+# Pytorch load supports only pytorch models
+def load_file_from_url(url, model_dir=None, progress=True, check_hash=False, file_name=None):
+    if model_dir is None:
+        hub_dir = get_dir()
+        model_dir = os.path.join(hub_dir, 'checkpoints')
 
-def appdata_dir(appname=None, roaming=False):
-    """ appdata_dir(appname=None, roaming=False)
+    try:
+        os.makedirs(model_dir)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            # Directory already exists, ignore.
+            pass
+        else:
+            # Unexpected OSError, re-raise.
+            raise
 
-    Get the path to the application directory, where applications are allowed
-    to write user specific files (e.g. configurations). For non-user specific
-    data, consider using common_appdata_dir().
-    If appname is given, a subdir is appended (and created if necessary).
-    If roaming is True, will prefer a roaming directory (Windows Vista/7).
-    """
+    parts = urlparse(url)
+    filename = os.path.basename(parts.path)
+    if file_name is not None:
+        filename = file_name
+    cached_file = os.path.join(model_dir, filename)
+    if not os.path.exists(cached_file):
+        sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))
+        hash_prefix = None
+        if check_hash:
+            r = HASH_REGEX.search(filename)  # r is Optional[Match[str]]
+            hash_prefix = r.group(1) if r else None
+        download_url_to_file(url, cached_file, hash_prefix, progress=progress)
 
-    # Define default user directory
-    userDir = os.getenv('FACEALIGNMENT_USERDIR', None)
-    if userDir is None:
-        userDir = os.path.expanduser('~')
-        if not os.path.isdir(userDir):  # pragma: no cover
-            userDir = '/var/tmp'  # issue #54
-
-    # Get system app data dir
-    path = None
-    if sys.platform.startswith('win'):
-        path1, path2 = os.getenv('LOCALAPPDATA'), os.getenv('APPDATA')
-        path = (path2 or path1) if roaming else (path1 or path2)
-    elif sys.platform.startswith('darwin'):
-        path = os.path.join(userDir, 'Library', 'Application Support')
-    # On Linux and as fallback
-    if not (path and os.path.isdir(path)):
-        path = userDir
-
-    # Maybe we should store things local to the executable (in case of a
-    # portable distro or a frozen application that wants to be portable)
-    prefix = sys.prefix
-    if getattr(sys, 'frozen', None):
-        prefix = os.path.abspath(os.path.dirname(sys.executable))
-    for reldir in ('settings', '../settings'):
-        localpath = os.path.abspath(os.path.join(prefix, reldir))
-        if os.path.isdir(localpath):  # pragma: no cover
-            try:
-                open(os.path.join(localpath, 'test.write'), 'wb').close()
-                os.remove(os.path.join(localpath, 'test.write'))
-            except IOError:
-                pass  # We cannot write in this directory
-            else:
-                path = localpath
-                break
-
-    # Get path specific for this app
-    if appname:
-        if path == userDir:
-            appname = '.' + appname.lstrip('.')  # Make it a hidden directory
-        path = os.path.join(path, appname)
-        if not os.path.isdir(path):  # pragma: no cover
-            os.mkdir(path)
-
-    # Done
-    return path
+    return cached_file

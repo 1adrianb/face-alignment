@@ -1,21 +1,10 @@
-import os
-import cv2
 from torch.utils.model_zoo import load_url
 
 from ..core import FaceDetector
+from ...utils import load_file_from_url
 
 from .net_blazeface import BlazeFace
 from .detect import *
-
-import requests
-import io
-
-
-def load_numpy_from_url(url):
-    response = requests.get(url)
-    response.raise_for_status()
-    data = np.load(io.BytesIO(response.content))  # Works!
-    return data
 
 models_urls = {
     'blazeface_weights': 'https://github.com/hollance/BlazeFace-PyTorch/blob/master/blazeface.pth?raw=true',
@@ -30,7 +19,7 @@ class BlazeFaceDetector(FaceDetector):
         # Initialise the face detector
         if path_to_detector is None:
             model_weights = load_url(models_urls['blazeface_weights'])
-            model_anchors = load_numpy_from_url(models_urls['blazeface_anchors'])
+            model_anchors = np.load(load_file_from_url(models_urls['blazeface_anchors']))
         else:
             model_weights = torch.load(path_to_detector)
             model_anchors = np.load(path_to_anchor)

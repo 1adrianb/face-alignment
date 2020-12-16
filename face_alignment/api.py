@@ -1,16 +1,9 @@
-from __future__ import print_function
-import os
 import torch
 from torch.utils.model_zoo import load_url
 from enum import Enum
 from skimage import io
 from skimage import color
 import numpy as np
-import cv2
-try:
-    import urllib.request as request_file
-except BaseException:
-    import urllib as request_file
 
 from .models import FAN, ResNetDepth
 from .utils import *
@@ -269,15 +262,3 @@ class FaceAlignment:
             predictions[image_path] = preds
 
         return predictions
-
-    @staticmethod
-    def remove_models(self):
-        base_path = os.path.join(appdata_dir('face_alignment'), "data")
-        for data_model in os.listdir(base_path):
-            file_path = os.path.join(base_path, data_model)
-            try:
-                if os.path.isfile(file_path):
-                    print('Removing ' + data_model + ' ...')
-                    os.unlink(file_path)
-            except Exception as e:
-                print(e)

@@ -1,4 +1,4 @@
-# Based on https://github.com/pytorch/pytorch/blob/master/Dockerfile
+# Based on a older version of https://github.com/pytorch/pytorch/blob/master/Dockerfile
 FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
