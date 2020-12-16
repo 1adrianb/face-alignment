@@ -14,7 +14,7 @@ def detect(net, img, device):
     preds = net.predict_on_image(img)
 
     if 0 == len(preds):
-        return np.zeros((1, 1, 5))
+        return [[]]
 
     shift = np.array([xshift, yshift] * 2)
     scores = preds[:, -1:]
@@ -47,9 +47,6 @@ def batch_detect(net, img_batch, device):
         scores = pred[:, -1:]
         locs = np.concatenate((pred[:, 1:2], pred[:, 0:1], pred[:, 3:4], pred[:, 2:3]), axis=1)
         bboxlists.append(np.concatenate((locs * orig_size + shift, scores), axis=1))
-
-    if 0 == len(bboxlists):
-        bboxlists = np.zeros((1, 1, 5))
 
     return bboxlists
 

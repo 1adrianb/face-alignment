@@ -72,10 +72,6 @@ def batch_detect(net, img_batch, device):
         bboxlists.append(bboxlist)
 
     bboxlists = np.array(bboxlists)
-
-    if 0 == len(bboxlists):
-        bboxlists = np.zeros((1, 1, 5))
-
     return bboxlists
 
 
