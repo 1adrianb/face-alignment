@@ -19,7 +19,7 @@ class BlazeFaceDetector(FaceDetector):
         # Initialise the face detector
         if path_to_detector is None:
             model_weights = load_url(models_urls['blazeface_weights'])
-            model_anchors =  np.load(load_file_from_url(models_urls['blazeface_anchors']))
+            model_anchors = np.load(load_file_from_url(models_urls['blazeface_anchors']))
         else:
             model_weights = torch.load(path_to_detector)
             model_anchors = np.load(path_to_anchor)

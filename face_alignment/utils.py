@@ -9,6 +9,7 @@ import cv2
 from urllib.parse import urlparse
 from torch.hub import download_url_to_file, get_dir, HASH_REGEX
 
+
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
         height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,

@@ -1,5 +1,6 @@
 import torch.nn as nn
 
+
 class Bottleneck(nn.Module):
 
     expansion = 4
@@ -38,6 +39,7 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
+
 
 class ResNetDepth(nn.Module):
 

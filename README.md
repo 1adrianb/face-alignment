@@ -87,7 +87,7 @@ Please also see the ``examples`` folder
 
 * Python 3.5+ (it may work with other versions too). Last version with support for python 2.7 was v1.1.1
 * Linux, Windows or macOS
-* pytorch (>=1.0)
+* pytorch (>=1.2)
 
 While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
 

@@ -5,6 +5,7 @@ import dlib
 from ..core import FaceDetector
 from ...utils import load_file_from_url
 
+
 class DlibDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, verbose=False):
         super().__init__(device, verbose)
@@ -13,8 +14,9 @@ class DlibDetector(FaceDetector):
 
         # Initialise the face detector
         if 'cuda' in device:
-            if path_to_detector is None:      
-                path_to_detector = load_file_from_url("https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat")
+            if path_to_detector is None:
+                path_to_detector = load_file_from_url(
+                    "https://www.adrianbulat.com/downloads/dlib/mmod_human_face_detector.dat")
 
             self.face_detector = dlib.cnn_face_detection_model_v1(path_to_detector)
         else:
