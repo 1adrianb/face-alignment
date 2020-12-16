@@ -7,7 +7,11 @@ import numpy as np
 import cv2
 
 from urllib.parse import urlparse
-from torch.hub import download_url_to_file, get_dir, HASH_REGEX
+from torch.hub import download_url_to_file, HASH_REGEX
+try:
+    from torch.hub import get_dir
+except BaseException:
+    from torch.hub import _get_torch_home as get_dir
 
 
 def _gaussian(
