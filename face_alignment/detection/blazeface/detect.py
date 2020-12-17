@@ -28,16 +28,18 @@ def detect(net, img, device):
 def batch_detect(net, img_batch, device):
     """
     Inputs:
-        - img_batch: a numpy array of shape (Batch size, Channels, Height, Width)
+        - img_batch: a numpy array or tensor of shape (Batch size, Channels, Height, Width)
+    Outputs:
+        - list of 2-dim numpy arrays with shape (faces_on_this_image, 5): x1, y1, x2, y2, confidence 
+          (x1, y1) - top left corner, (x2, y2) - bottom right corner
     """
     B, C, H, W = img_batch.shape
     orig_size = min(H, W)
-
-    # BB, HH, WW = img_batch.shape
-    # if img_batch
+    
     if isinstance(img_batch, torch.Tensor):
         img_batch = img_batch.cpu().numpy()
-        img_batch = img_batch.transpose((0, 2, 3, 1))
+
+    img_batch = img_batch.transpose((0, 2, 3, 1))
 
     imgs, (xshift, yshift) = resize_and_crop_batch(img_batch, 128)
     preds = net.predict_on_batch(imgs)
