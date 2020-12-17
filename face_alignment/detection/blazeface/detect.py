@@ -32,12 +32,11 @@ def batch_detect(net, img_batch, device):
     """
     B, C, H, W = img_batch.shape
     orig_size = min(H, W)
-
-    # BB, HH, WW = img_batch.shape
-    # if img_batch
+    
     if isinstance(img_batch, torch.Tensor):
         img_batch = img_batch.cpu().numpy()
-        img_batch = img_batch.transpose((0, 2, 3, 1))
+
+    img_batch = img_batch.transpose((0, 2, 3, 1))
 
     imgs, (xshift, yshift) = resize_and_crop_batch(img_batch, 128)
     preds = net.predict_on_batch(imgs)
