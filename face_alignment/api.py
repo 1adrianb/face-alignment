@@ -1,11 +1,9 @@
 import torch
-from torch.utils.model_zoo import load_url
 from enum import Enum
 from skimage import io
 from skimage import color
 import numpy as np
 
-from .models import FAN, ResNetDepth
 from .utils import *
 
 
@@ -37,9 +35,9 @@ class NetworkSize(Enum):
         return self.value
 
 models_urls = {
-    '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4-11f355bf06.pth.tar',
-    '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4-7835d9f11d.pth.tar',
-    'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth-2a464da4ea.pth.tar',
+    '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4-cd938726ad.zip',
+    '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4-4a694010b9.zip',
+    'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth-6c4283c0e0.zip',
 }
 
 
@@ -62,27 +60,18 @@ class FaceAlignment:
         self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose)
 
         # Initialise the face alignemnt networks
-        self.face_alignment_net = FAN(network_size)
         if landmarks_type == LandmarksType._2D:
             network_name = '2DFAN-' + str(network_size)
         else:
             network_name = '3DFAN-' + str(network_size)
-
-        fan_weights = load_url(models_urls[network_name], map_location=lambda storage, loc: storage)
-        self.face_alignment_net.load_state_dict(fan_weights)
+        self.face_alignment_net = torch.jit.load(load_file_from_url(models_urls[network_name]))
 
         self.face_alignment_net.to(device)
         self.face_alignment_net.eval()
 
         # Initialiase the depth prediciton network
         if landmarks_type == LandmarksType._3D:
-            self.depth_prediciton_net = ResNetDepth()
-
-            depth_weights = load_url(models_urls['depth'], map_location=lambda storage, loc: storage)
-            depth_dict = {
-                k.replace('module.', ''): v for k,
-                v in depth_weights['state_dict'].items()}
-            self.depth_prediciton_net.load_state_dict(depth_dict)
+            self.depth_prediciton_net = torch.jit.load(load_file_from_url(models_urls['depth']))
 
             self.depth_prediciton_net.to(device)
             self.depth_prediciton_net.eval()
