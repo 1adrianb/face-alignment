@@ -139,10 +139,9 @@ class FaceAlignment:
             inp = inp.to(self.device)
             inp.div_(255.0).unsqueeze_(0)
 
-            out = self.face_alignment_net(inp)[-1].detach()
+            out = self.face_alignment_net(inp).detach()
             if self.flip_input:
-                out += flip(self.face_alignment_net(flip(inp))
-                            [-1].detach(), is_label=True)
+                out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)
             out = out.cpu()
 
             pts, pts_img = get_preds_fromhm(out, center, scale)
@@ -210,10 +209,9 @@ class FaceAlignment:
                 inp = inp.to(self.device)
                 inp.div_(255.0).unsqueeze_(0)
 
-                out = self.face_alignment_net(inp)[-1].detach()
+                out = self.face_alignment_net(inp).detach()
                 if self.flip_input:
-                    out += flip(self.face_alignment_net(flip(inp))
-                                [-1].detach(), is_label=True)  # patched inp_batch undefined variable error
+                    out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)  # patched inp_batch undefined variable error
                 out = out.cpu()
                 pts, pts_img = get_preds_fromhm(out, center, scale)
 
