@@ -254,6 +254,7 @@ def flip(tensor, is_label=False):
 
     return tensor
 
+
 def get_image(image_or_path):
     """Reads an image from file or array/tensor and converts it to RGB (H,W,3).
 
@@ -275,7 +276,7 @@ def get_image(image_or_path):
         image = color.gray2rgb(image)
     elif image.ndim == 4:
         image = image[..., :3]
-        
+
     return image
 
 

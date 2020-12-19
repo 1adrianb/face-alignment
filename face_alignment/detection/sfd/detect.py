@@ -36,9 +36,9 @@ def batch_detect(net, img_batch, device):
         torch.backends.cudnn.benchmark = True
 
     BB, CC, HH, WW = img_batch.size()
-    
-    img_batch = img_batch.flip(-3) # RGB to BGR
-    img_batch = img_batch - torch.Tensor([104, 117, 123]).view(1,3,1,1)
+
+    img_batch = img_batch.flip(-3)  # RGB to BGR
+    img_batch = img_batch - torch.Tensor([104, 117, 123]).view(1, 3, 1, 1)
 
     with torch.no_grad():
         olist = net(img_batch.float())  # patched uint8_t overflow error
