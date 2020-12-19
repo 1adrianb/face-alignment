@@ -41,9 +41,10 @@ def batch_detect(net, img_batch, device):
         olist[i * 2] = F.softmax(olist[i * 2], dim=1)
 
     olist = [oelem.data.cpu().numpy() for oelem in olist]
-    
+
     bboxlists = get_predictions(List(olist), batch_size)
     return bboxlists
+
 
 @jit(nopython=True)
 def get_predictions(olist, batch_size):
@@ -67,8 +68,7 @@ def get_predictions(olist, batch_size):
         bboxlists.append(bboxlist)
 
     bboxlists = np.array(bboxlists)
-    return bboxlists  
-    
+    return bboxlists
 
 
 def flip_detect(net, img, device):

@@ -2,6 +2,7 @@ import math
 import numpy as np
 from numba import jit
 
+
 def nms(dets, thresh):
     if 0 == len(dets):
         return []
@@ -48,6 +49,7 @@ def encode(matched, priors, variances):
 
     # return target for smooth_l1_loss
     return np.concatenate([g_cxcy, g_wh], 1)  # [num_priors,4]
+
 
 @jit(nopython=True)
 def decode(loc, priors, variances):

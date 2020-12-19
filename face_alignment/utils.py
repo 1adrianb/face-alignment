@@ -18,6 +18,7 @@ except BaseException:
 
 gauss_kernel = None
 
+
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
         height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,
@@ -143,6 +144,7 @@ def crop(image, center, scale, resolution=256.0):
                         interpolation=cv2.INTER_LINEAR)
     return newImg
 
+
 @jit(nopython=True)
 def transform_np(point, center, scale, resolution, invert=False):
     """Generate and affine transformation matrix.
@@ -179,6 +181,7 @@ def transform_np(point, center, scale, resolution, invert=False):
 
     return new_point.astype(np.int32)
 
+
 def get_preds_fromhm(hm, center=None, scale=None):
     """Obtain (x,y) coordinates given a set of N heatmaps. If the center
     and the scale is provided the function will return the points also in
@@ -192,14 +195,15 @@ def get_preds_fromhm(hm, center=None, scale=None):
         scale {float} -- face scale (default: {None})
     """
     B, C, H, W = hm.shape
-    idx = np.argmax(hm.reshape(B,C,H*W),axis=2)
+    idx = np.argmax(hm.reshape(B, C, H * W), axis=2)
     preds, preds_orig = _get_preds_fromhm(hm, idx, center, scale)
 
     return preds, preds_orig
 
+
 @jit(nopython=True)
 def _get_preds_fromhm(hm, idx, center=None, scale=None):
-    """Obtain (x,y) coordinates given a set of N heatmaps and the 
+    """Obtain (x,y) coordinates given a set of N heatmaps and the
     coresponding locations of the maximums. If the center
     and the scale is provided the function will return the points also in
     the original coordinate frame.
@@ -214,8 +218,8 @@ def _get_preds_fromhm(hm, idx, center=None, scale=None):
     B, C, H, W = hm.shape
     idx += 1
     preds = idx.repeat(2).reshape(B, C, 2).astype(np.float32)
-    preds[:,:,0] = (preds[:,:,0]-1)%W+1
-    preds[:,:,1] = np.floor((preds[:,:,1]-1)/H)+1
+    preds[:, :, 0] = (preds[:, :, 0] - 1) % W + 1
+    preds[:, :, 1] = np.floor((preds[:, :, 1] - 1) / H) + 1
 
     for i in range(B):
         for j in range(C):
@@ -225,7 +229,7 @@ def _get_preds_fromhm(hm, idx, center=None, scale=None):
                 diff = np.array(
                     [hm_[pY, pX + 1] - hm_[pY, pX - 1],
                      hm_[pY + 1, pX] - hm_[pY - 1, pX]])
-                preds[i, j] += np.sign(diff)*0.25
+                preds[i, j] += np.sign(diff) * 0.25
 
     preds -= 0.5
 
