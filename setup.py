@@ -42,6 +42,7 @@ requirements = [
     'scikit-image',
     'opencv-python',
     'tqdm',
+    'numba',
     'enum34;python_version<"3.4"'
 ]
 

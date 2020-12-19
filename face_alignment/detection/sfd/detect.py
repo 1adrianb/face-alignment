@@ -3,6 +3,8 @@ import torch.nn.functional as F
 
 import cv2
 import numpy as np
+from numba import jit
+from numba.typed import List
 
 from .bbox import *
 
@@ -26,7 +28,7 @@ def batch_detect(net, img_batch, device):
     if 'cuda' in device:
         torch.backends.cudnn.benchmark = True
 
-    BB = img_batch.size(0)
+    batch_size = img_batch.size(0)
     img_batch = img_batch.to(device, dtype=torch.float32)
 
     img_batch = img_batch.flip(-3)  # RGB to BGR
@@ -38,12 +40,16 @@ def batch_detect(net, img_batch, device):
     for i in range(len(olist) // 2):
         olist[i * 2] = F.softmax(olist[i * 2], dim=1)
 
-    bboxlists = []
-
     olist = [oelem.data.cpu().numpy() for oelem in olist]
-    variances = [0.1, 0.2]
+    
+    bboxlists = get_predictions(List(olist), batch_size)
+    return bboxlists
 
-    for j in range(BB):
+@jit(nopython=True)
+def get_predictions(olist, batch_size):
+    bboxlists = []
+    variances = [0.1, 0.2]
+    for j in range(batch_size):
         bboxlist = []
         for i in range(len(olist) // 2):
             ocls, oreg = olist[i * 2], olist[i * 2 + 1]
@@ -52,16 +58,17 @@ def batch_detect(net, img_batch, device):
             for Iindex, hindex, windex in poss:
                 axc, ayc = stride / 2 + windex * stride, stride / 2 + hindex * stride
                 score = ocls[j, 1, hindex, windex]
-                loc = oreg[j, :, hindex, windex].resize(1, 4)
+                loc = oreg[j, :, hindex, windex].copy().reshape(1, 4)
                 priors = np.array([[axc / 1.0, ayc / 1.0, stride * 4 / 1.0, stride * 4 / 1.0]])
                 box = decode(loc, priors, variances)
-                x1, y1, x2, y2 = box[0] * 1.0
+                x1, y1, x2, y2 = box[0]
                 bboxlist.append([x1, y1, x2, y2, score])
 
         bboxlists.append(bboxlist)
 
     bboxlists = np.array(bboxlists)
-    return bboxlists
+    return bboxlists  
+    
 
 
 def flip_detect(net, img, device):

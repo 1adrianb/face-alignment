@@ -1,19 +1,6 @@
 import math
 import numpy as np
-
-def bboxlog(x1, y1, x2, y2, axc, ayc, aww, ahh):
-    xc, yc, ww, hh = (x2 + x1) / 2, (y2 + y1) / 2, x2 - x1, y2 - y1
-    dx, dy = (xc - axc) / aww, (yc - ayc) / ahh
-    dw, dh = math.log(ww / aww), math.log(hh / ahh)
-    return dx, dy, dw, dh
-
-
-def bboxloginv(dx, dy, dw, dh, axc, ayc, aww, ahh):
-    xc, yc = dx * aww + axc, dy * ahh + ayc
-    ww, hh = math.exp(dw) * aww, math.exp(dh) * ahh
-    x1, x2, y1, y2 = xc - ww / 2, xc + ww / 2, yc - hh / 2, yc + hh / 2
-    return x1, y1, x2, y2
-
+from numba import jit
 
 def nms(dets, thresh):
     if 0 == len(dets):
@@ -62,7 +49,7 @@ def encode(matched, priors, variances):
     # return target for smooth_l1_loss
     return np.concatenate([g_cxcy, g_wh], 1)  # [num_priors,4]
 
-
+@jit(nopython=True)
 def decode(loc, priors, variances):
     """Decode locations from predictions using priors to undo
     the encoding we did for offset regression at train time.

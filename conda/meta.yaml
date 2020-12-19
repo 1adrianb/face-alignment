@@ -24,6 +24,7 @@ requirements:
     - scipy
     - opencv
     - tqdm
+    - numba
 
 about:
   home: https://github.com/1adrianb/face-alignment
