@@ -1,11 +1,14 @@
 import unittest
 import numpy as np
 import face_alignment
-
+import sys
+import torch
+sys.path.append('.')
+from face_alignment.utils import get_image
 
 class Tester(unittest.TestCase):
-    def test_predict_points(self):
-        reference_data = [np.array([[137.       , 240.       , -85.907196 ],
+    def setUp(self) -> None:
+        self.reference_data = [np.array([[137.       , 240.       , -85.907196 ],
                                     [140.       , 264.       , -81.1443   ],
                                     [143.       , 288.       , -76.25633  ],
                                     [146.       , 306.       , -69.01708  ],
@@ -73,9 +76,25 @@ class Tester(unittest.TestCase):
                                     [224.       , 303.       ,  49.817806 ],
                                     [215.       , 303.       ,  49.59815  ],
                                     [206.       , 303.       ,  47.13894  ]], dtype=np.float32)]
-        
+    
+    def test_predict_points(self): 
         fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
         preds = fa.get_landmarks('test/assets/aflw-test.jpg')
+        self.assertEqual(len(preds), len(self.reference_data))
+        for pred, reference in zip(preds, self.reference_data):
+            self.assertTrue(np.allclose(pred, reference))
+            
+    def test_predict_points(self):
+        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
+        
+        reference_data = self.reference_data + self.reference_data
+        reference_data.append([])
+        image = get_image('test/assets/aflw-test.jpg')
+        batch = np.stack([image, image, np.zeros_like(image)])
+        batch = torch.Tensor(batch.transpose(0, 3, 1, 2))
+        
+        preds = fa.get_landmarks_from_batch(batch)
+        
         self.assertEqual(len(preds), len(reference_data))
         for pred, reference in zip(preds, reference_data):
             self.assertTrue(np.allclose(pred, reference))

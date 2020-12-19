@@ -13,6 +13,8 @@ models_urls = {
 
 
 class SFDDetector(FaceDetector):
+    '''SF3D Detector.
+    '''
     def __init__(self, device, path_to_detector=None, verbose=False):
         super(SFDDetector, self).__init__(device, verbose)
 

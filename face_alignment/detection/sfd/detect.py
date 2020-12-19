@@ -17,7 +17,6 @@ from .bbox import *
 
 
 def detect(net, img, device):
-    img = img - np.array([104, 117, 123])
     img = img.transpose(2, 0, 1)
     # Creates a batch of 1
     img = img.reshape((1,) + img.shape)
@@ -37,6 +36,9 @@ def batch_detect(net, img_batch, device):
         torch.backends.cudnn.benchmark = True
 
     BB, CC, HH, WW = img_batch.size()
+    
+    img_batch = img_batch.flip(-3) # RGB to BGR
+    img_batch = img_batch - torch.Tensor([104, 117, 123]).view(1,3,1,1)
 
     with torch.no_grad():
         olist = net(img_batch.float())  # patched uint8_t overflow error
