@@ -68,40 +68,40 @@ class s3fd(nn.Module):
         self.conv7_2_mbox_loc = nn.Conv2d(256, 4, kernel_size=3, stride=1, padding=1)
 
     def forward(self, x):
-        h = F.relu(self.conv1_1(x))
-        h = F.relu(self.conv1_2(h))
+        h = F.relu(self.conv1_1(x), inplace=True)
+        h = F.relu(self.conv1_2(h), inplace=True)
         h = F.max_pool2d(h, 2, 2)
 
-        h = F.relu(self.conv2_1(h))
-        h = F.relu(self.conv2_2(h))
+        h = F.relu(self.conv2_1(h), inplace=True)
+        h = F.relu(self.conv2_2(h), inplace=True)
         h = F.max_pool2d(h, 2, 2)
 
-        h = F.relu(self.conv3_1(h))
-        h = F.relu(self.conv3_2(h))
-        h = F.relu(self.conv3_3(h))
+        h = F.relu(self.conv3_1(h), inplace=True)
+        h = F.relu(self.conv3_2(h), inplace=True)
+        h = F.relu(self.conv3_3(h), inplace=True)
         f3_3 = h
         h = F.max_pool2d(h, 2, 2)
 
-        h = F.relu(self.conv4_1(h))
-        h = F.relu(self.conv4_2(h))
-        h = F.relu(self.conv4_3(h))
+        h = F.relu(self.conv4_1(h), inplace=True)
+        h = F.relu(self.conv4_2(h), inplace=True)
+        h = F.relu(self.conv4_3(h), inplace=True)
         f4_3 = h
         h = F.max_pool2d(h, 2, 2)
 
-        h = F.relu(self.conv5_1(h))
-        h = F.relu(self.conv5_2(h))
-        h = F.relu(self.conv5_3(h))
+        h = F.relu(self.conv5_1(h), inplace=True)
+        h = F.relu(self.conv5_2(h), inplace=True)
+        h = F.relu(self.conv5_3(h), inplace=True)
         f5_3 = h
         h = F.max_pool2d(h, 2, 2)
 
-        h = F.relu(self.fc6(h))
-        h = F.relu(self.fc7(h))
+        h = F.relu(self.fc6(h), inplace=True)
+        h = F.relu(self.fc7(h), inplace=True)
         ffc7 = h
-        h = F.relu(self.conv6_1(h))
-        h = F.relu(self.conv6_2(h))
+        h = F.relu(self.conv6_1(h), inplace=True)
+        h = F.relu(self.conv6_2(h), inplace=True)
         f6_2 = h
-        h = F.relu(self.conv7_1(h))
-        h = F.relu(self.conv7_2(h))
+        h = F.relu(self.conv7_1(h), inplace=True)
+        h = F.relu(self.conv7_2(h), inplace=True)
         f7_2 = h
 
         f3_3 = self.conv3_3_norm(f3_3)

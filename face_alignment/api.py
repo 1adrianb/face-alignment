@@ -128,10 +128,11 @@ class FaceAlignment:
             out = self.face_alignment_net(inp).detach()
             if self.flip_input:
                 out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)
-            out = out.cpu()
+            out = out.cpu().numpy()
 
             pts, pts_img = get_preds_fromhm(out, center, scale)
             pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
+            pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
 
             if self.landmarks_type == LandmarksType._3D:
                 heatmaps = np.zeros((68, 256, 256), dtype=np.float32)

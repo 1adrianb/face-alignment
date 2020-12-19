@@ -1,27 +1,20 @@
 import torch
 import torch.nn.functional as F
 
-import os
-import sys
 import cv2
-import random
-import datetime
-import math
-import argparse
 import numpy as np
+from numba import jit
+from numba.typed import List
 
-import scipy.io as sio
-import zipfile
-from .net_s3fd import s3fd
 from .bbox import *
 
 
 def detect(net, img, device):
     img = img.transpose(2, 0, 1)
     # Creates a batch of 1
-    img = img.reshape((1,) + img.shape)
+    img = np.expand_dims(img, 0)
 
-    img = torch.from_numpy(img).float().to(device)
+    img = torch.from_numpy(img).to(device, dtype=torch.float32)
 
     return batch_detect(net, img, device)
 
@@ -35,37 +28,41 @@ def batch_detect(net, img_batch, device):
     if 'cuda' in device:
         torch.backends.cudnn.benchmark = True
 
-    BB, CC, HH, WW = img_batch.size()
+    batch_size = img_batch.size(0)
+    img_batch = img_batch.to(device, dtype=torch.float32)
 
     img_batch = img_batch.flip(-3)  # RGB to BGR
-    img_batch = img_batch - torch.Tensor([104, 117, 123]).view(1, 3, 1, 1)
+    img_batch = img_batch - torch.tensor([104.0, 117.0, 123.0], device=device).view(1, 3, 1, 1)
 
     with torch.no_grad():
-        olist = net(img_batch.float())  # patched uint8_t overflow error
+        olist = net(img_batch)  # patched uint8_t overflow error
 
     for i in range(len(olist) // 2):
         olist[i * 2] = F.softmax(olist[i * 2], dim=1)
 
+    olist = [oelem.data.cpu().numpy() for oelem in olist]
+
+    bboxlists = get_predictions(List(olist), batch_size)
+    return bboxlists
+
+
+@jit(nopython=True)
+def get_predictions(olist, batch_size):
     bboxlists = []
-
-    olist = [oelem.data.cpu() for oelem in olist]
-
-    for j in range(BB):
+    variances = [0.1, 0.2]
+    for j in range(batch_size):
         bboxlist = []
         for i in range(len(olist) // 2):
             ocls, oreg = olist[i * 2], olist[i * 2 + 1]
-            FB, FC, FH, FW = ocls.size()  # feature map size
             stride = 2**(i + 2)    # 4,8,16,32,64,128
-            anchor = stride * 4
             poss = zip(*np.where(ocls[:, 1, :, :] > 0.05))
             for Iindex, hindex, windex in poss:
                 axc, ayc = stride / 2 + windex * stride, stride / 2 + hindex * stride
                 score = ocls[j, 1, hindex, windex]
-                loc = oreg[j, :, hindex, windex].contiguous().view(1, 4)
-                priors = torch.Tensor([[axc / 1.0, ayc / 1.0, stride * 4 / 1.0, stride * 4 / 1.0]])
-                variances = [0.1, 0.2]
+                loc = oreg[j, :, hindex, windex].copy().reshape(1, 4)
+                priors = np.array([[axc / 1.0, ayc / 1.0, stride * 4 / 1.0, stride * 4 / 1.0]])
                 box = decode(loc, priors, variances)
-                x1, y1, x2, y2 = box[0] * 1.0
+                x1, y1, x2, y2 = box[0]
                 bboxlist.append([x1, y1, x2, y2, score])
 
         bboxlists.append(bboxlist)

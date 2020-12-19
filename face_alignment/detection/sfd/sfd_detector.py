@@ -34,7 +34,7 @@ class SFDDetector(FaceDetector):
         if len(bboxlist) > 0:
             keep = nms(bboxlist, 0.3)
             bboxlist = bboxlist[keep, :]
-            bboxlist = [x for x in bboxlist if x[-1] > 0.5]
+            bboxlist = [x for x in bboxlist if x[-1] > threshold]
 
         return bboxlist
 
