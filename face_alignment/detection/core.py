@@ -3,7 +3,6 @@ import glob
 from tqdm import tqdm
 import numpy as np
 import torch
-import cv2
 from skimage import io
 
 

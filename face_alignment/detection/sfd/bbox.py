@@ -1,30 +1,5 @@
-import os
-import sys
-import cv2
-import random
-import datetime
-import time
 import math
-import argparse
 import numpy as np
-import torch
-
-try:
-    from iou import IOU
-except BaseException:
-    # IOU cython speedup 10x
-    def IOU(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2):
-        sa = abs((ax2 - ax1) * (ay2 - ay1))
-        sb = abs((bx2 - bx1) * (by2 - by1))
-        x1, y1 = max(ax1, bx1), max(ay1, by1)
-        x2, y2 = min(ax2, bx2), min(ay2, by2)
-        w = x2 - x1
-        h = y2 - y1
-        if w < 0 or h < 0:
-            return 0.0
-        else:
-            return 1.0 * w * h / (sa + sb - w * h)
-
 
 def bboxlog(x1, y1, x2, y2, axc, ayc, aww, ahh):
     xc, yc, ww, hh = (x2 + x1) / 2, (y2 + y1) / 2, x2 - x1, y2 - y1
@@ -82,9 +57,10 @@ def encode(matched, priors, variances):
     g_cxcy /= (variances[0] * priors[:, 2:])
     # match wh / prior wh
     g_wh = (matched[:, 2:] - matched[:, :2]) / priors[:, 2:]
-    g_wh = torch.log(g_wh) / variances[1]
+    g_wh = np.log(g_wh) / variances[1]
+
     # return target for smooth_l1_loss
-    return torch.cat([g_cxcy, g_wh], 1)  # [num_priors,4]
+    return np.concatenate([g_cxcy, g_wh], 1)  # [num_priors,4]
 
 
 def decode(loc, priors, variances):
@@ -100,9 +76,9 @@ def decode(loc, priors, variances):
         decoded bounding box predictions
     """
 
-    boxes = torch.cat((
+    boxes = np.concatenate((
         priors[:, :2] + loc[:, :2] * variances[0] * priors[:, 2:],
-        priors[:, 2:] * torch.exp(loc[:, 2:] * variances[1])), 1)
+        priors[:, 2:] * np.exp(loc[:, 2:] * variances[1])), 1)
     boxes[:, :2] -= boxes[:, 2:] / 2
     boxes[:, 2:] += boxes[:, :2]
     return boxes
