@@ -85,7 +85,7 @@ class Tester(unittest.TestCase):
         for pred, reference in zip(preds, self.reference_data):
             self.assertTrue(np.allclose(pred, reference))
 
-    def test_predict_points(self):
+    def test_predict_batch_points(self):
         fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
 
         reference_data = self.reference_data + self.reference_data
