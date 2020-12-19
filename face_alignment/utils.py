@@ -16,6 +16,8 @@ try:
 except BaseException:
     from torch.hub import _get_torch_home as get_dir
 
+gauss_kernel = None
+
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
         height=None, sigma_horz=None, sigma_vert=None, mean_horz=0.5,
@@ -43,13 +45,18 @@ def _gaussian(
 
 
 def draw_gaussian(image, point, sigma):
+    global gauss_kernel
     # Check if the gaussian is inside
     ul = [math.floor(point[0] - 3 * sigma), math.floor(point[1] - 3 * sigma)]
     br = [math.floor(point[0] + 3 * sigma), math.floor(point[1] + 3 * sigma)]
     if (ul[0] > image.shape[1] or ul[1] > image.shape[0] or br[0] < 1 or br[1] < 1):
         return image
     size = 6 * sigma + 1
-    g = _gaussian(size)
+    if gauss_kernel is None:
+        g = _gaussian(size)
+        gauss_kernel = g
+    else:
+        g = gauss_kernel
     g_x = [int(max(1, -ul[0])), int(min(br[0], image.shape[1])) - int(max(1, ul[0])) + int(max(1, -ul[0]))]
     g_y = [int(max(1, -ul[1])), int(min(br[1], image.shape[0])) - int(max(1, ul[1])) + int(max(1, -ul[1]))]
     img_x = [int(max(1, ul[0])), int(min(br[0], image.shape[1]))]
@@ -138,6 +145,22 @@ def crop(image, center, scale, resolution=256.0):
 
 @jit(nopython=True)
 def transform_np(point, center, scale, resolution, invert=False):
+    """Generate and affine transformation matrix.
+
+    Given a set of points, a center, a scale and a targer resolution, the
+    function generates and affine transformation matrix. If invert is ``True``
+    it will produce the inverse transformation.
+
+    Arguments:
+        point {numpy.array} -- the input 2D point
+        center {numpy.array} -- the center around which to perform the transformations
+        scale {float} -- the scale of the face/object
+        resolution {float} -- the output resolution
+
+    Keyword Arguments:
+        invert {bool} -- define wherever the function should produce the direct or the
+        inverse transformation matrix (default: {False})
+    """
     _pt = np.ones(3)
     _pt[0] = point[0]
     _pt[1] = point[1]
