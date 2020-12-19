@@ -56,7 +56,7 @@ def draw_gaussian(image, point, sigma):
         g = _gaussian(size)
         gauss_kernel = g
     else:
-        g = gauss_kernel
+        g = gauss_kernel.clone()
     g_x = [int(max(1, -ul[0])), int(min(br[0], image.shape[1])) - int(max(1, ul[0])) + int(max(1, -ul[0]))]
     g_y = [int(max(1, -ul[1])), int(min(br[1], image.shape[0])) - int(max(1, ul[1])) + int(max(1, -ul[1]))]
     img_x = [int(max(1, ul[0])), int(min(br[0], image.shape[1]))]
@@ -244,7 +244,7 @@ def create_target_heatmap(target_landmarks, centers, scales):
     for i in range(heatmaps.shape[0]):
         for p in range(68):
             landmark_cropped_coor = transform(target_landmarks[i, p] + 1, centers[i], scales[i], 64, invert=False)
-            heatmaps[i, p] = draw_gaussian(heatmaps[i, p], landmark_cropped_coor + 1, 1)
+            heatmaps[i, p] = draw_gaussian(heatmaps[i, p], landmark_cropped_coor + 1, 2)
     return torch.tensor(heatmaps)
 
 
