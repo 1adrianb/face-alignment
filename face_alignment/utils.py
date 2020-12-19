@@ -5,6 +5,8 @@ import torch
 import math
 import numpy as np
 import cv2
+from skimage import io
+from skimage import color
 
 from urllib.parse import urlparse
 from torch.hub import download_url_to_file, HASH_REGEX
@@ -251,6 +253,31 @@ def flip(tensor, is_label=False):
         tensor = tensor.flip(tensor.ndimension() - 1)
 
     return tensor
+
+
+def get_image(image_or_path):
+    """Reads an image from file or array/tensor and converts it to RGB (H,W,3).
+
+    Arguments:
+        tensor {Sstring, numpy.array or torch.tensor} -- [the input image or path to it]
+    """
+    if isinstance(image_or_path, str):
+        try:
+            image = io.imread(image_or_path)
+        except IOError:
+            print("error opening file :: ", image_or_path)
+            return None
+    elif isinstance(image_or_path, torch.Tensor):
+        image = image_or_path.detach().cpu().numpy()
+    else:
+        image = image_or_path
+
+    if image.ndim == 2:
+        image = color.gray2rgb(image)
+    elif image.ndim == 4:
+        image = image[..., :3]
+
+    return image
 
 
 # Pytorch load supports only pytorch models
