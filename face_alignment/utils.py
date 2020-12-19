@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 from skimage import io
 from skimage import color
+from numba import jit
 
 from urllib.parse import urlparse
 from torch.hub import download_url_to_file, HASH_REGEX
@@ -14,7 +15,6 @@ try:
     from torch.hub import get_dir
 except BaseException:
     from torch.hub import _get_torch_home as get_dir
-
 
 def _gaussian(
         size=3, sigma=0.25, amplitude=1, normalize=False, width=None,
@@ -136,6 +136,25 @@ def crop(image, center, scale, resolution=256.0):
                         interpolation=cv2.INTER_LINEAR)
     return newImg
 
+@jit(nopython=True)
+def transform_np(point, center, scale, resolution, invert=False):
+    _pt = np.ones(3)
+    _pt[0] = point[0]
+    _pt[1] = point[1]
+
+    h = 200.0 * scale
+    t = np.eye(3)
+    t[0, 0] = resolution / h
+    t[1, 1] = resolution / h
+    t[0, 2] = resolution * (-center[0] / h + 0.5)
+    t[1, 2] = resolution * (-center[1] / h + 0.5)
+
+    if invert:
+        t = np.ascontiguousarray(np.linalg.pinv(t))
+
+    new_point = np.dot(t, _pt)[0:2]
+
+    return new_point.astype(np.int32)
 
 def get_preds_fromhm(hm, center=None, scale=None):
     """Obtain (x,y) coordinates given a set of N heatmaps. If the center
@@ -149,31 +168,50 @@ def get_preds_fromhm(hm, center=None, scale=None):
         center {torch.tensor} -- the center of the bounding box (default: {None})
         scale {float} -- face scale (default: {None})
     """
-    max, idx = torch.max(
-        hm.view(hm.size(0), hm.size(1), hm.size(2) * hm.size(3)), 2)
-    idx += 1
-    preds = idx.view(idx.size(0), idx.size(1), 1).repeat(1, 1, 2).float()
-    preds[..., 0].apply_(lambda x: (x - 1) % hm.size(3) + 1)
-    preds[..., 1].add_(-1).div_(hm.size(2)).floor_().add_(1)
+    B, C, H, W = hm.shape
+    idx = np.argmax(hm.reshape(B,C,H*W),axis=2)
+    preds, preds_orig = _get_preds_fromhm(hm, idx, center, scale)
 
-    for i in range(preds.size(0)):
-        for j in range(preds.size(1)):
+    return preds, preds_orig
+
+@jit(nopython=True)
+def _get_preds_fromhm(hm, idx, center=None, scale=None):
+    """Obtain (x,y) coordinates given a set of N heatmaps and the 
+    coresponding locations of the maximums. If the center
+    and the scale is provided the function will return the points also in
+    the original coordinate frame.
+
+    Arguments:
+        hm {torch.tensor} -- the predicted heatmaps, of shape [B, N, W, H]
+
+    Keyword Arguments:
+        center {torch.tensor} -- the center of the bounding box (default: {None})
+        scale {float} -- face scale (default: {None})
+    """
+    B, C, H, W = hm.shape
+    idx += 1
+    preds = idx.repeat(2).reshape(B, C, 2).astype(np.float32)
+    preds[:,:,0] = (preds[:,:,0]-1)%W+1
+    preds[:,:,1] = np.floor((preds[:,:,1]-1)/H)+1
+
+    for i in range(B):
+        for j in range(C):
             hm_ = hm[i, j, :]
             pX, pY = int(preds[i, j, 0]) - 1, int(preds[i, j, 1]) - 1
             if pX > 0 and pX < 63 and pY > 0 and pY < 63:
-                diff = torch.FloatTensor(
+                diff = np.array(
                     [hm_[pY, pX + 1] - hm_[pY, pX - 1],
                      hm_[pY + 1, pX] - hm_[pY - 1, pX]])
-                preds[i, j].add_(diff.sign_().mul_(.25))
+                preds[i, j] += np.sign(diff)*0.25
 
-    preds.add_(-.5)
+    preds -= 0.5
 
-    preds_orig = torch.zeros(preds.size())
+    preds_orig = np.zeros_like(preds)
     if center is not None and scale is not None:
-        for i in range(hm.size(0)):
-            for j in range(hm.size(1)):
-                preds_orig[i, j] = transform(
-                    preds[i, j], center, scale, hm.size(2), True)
+        for i in range(B):
+            for j in range(C):
+                preds_orig[i, j] = transform_np(
+                    preds[i, j], center, scale, H, True)
 
     return preds, preds_orig
 
