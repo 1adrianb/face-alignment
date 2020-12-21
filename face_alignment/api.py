@@ -1,13 +1,12 @@
 import torch
-from enum import Enum
+from enum import IntEnum
 from skimage import io
-from skimage import color
 import numpy as np
 
 from .utils import *
 
 
-class LandmarksType(Enum):
+class LandmarksType(IntEnum):
     """Enum class defining the type of landmarks to detect.
 
     ``_2D`` - the detected points ``(x,y)`` are detected in a 2D space and follow the visible contour of the face
@@ -20,24 +19,30 @@ class LandmarksType(Enum):
     _3D = 3
 
 
-class NetworkSize(Enum):
+class NetworkSize(IntEnum):
     # TINY = 1
     # SMALL = 2
     # MEDIUM = 3
     LARGE = 4
 
-    def __new__(cls, value):
-        member = object.__new__(cls)
-        member._value_ = value
-        return member
 
-    def __int__(self):
-        return self.value
-
-models_urls = {
+default_model_urls = {
     '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4-cd938726ad.zip',
     '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4-4a694010b9.zip',
     'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth-6c4283c0e0.zip',
+}
+
+models_urls = {
+    '1.6': {
+        '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4_1.6-c827573f02.zip',
+        '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4_1.6-ec5cf40a1d.zip',
+        'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth_1.6-2aa3f18772.zip',
+    },
+    '1.5': {
+        '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4_1.5-a60332318a.zip',
+        '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4_1.5-176570af4d.zip',
+        'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth_1.5-bc10f98e39.zip',
+    },
 }
 
 
@@ -50,6 +55,11 @@ class FaceAlignment:
         self.verbose = verbose
 
         network_size = int(network_size)
+        pytorch_version = torch.__version__
+        if 'dev' in pytorch_version:
+            pytorch_version = pytorch_version.rsplit('.', 2)[0]
+        else:
+            pytorch_version = pytorch_version.rsplit('.', 1)[0]
 
         if 'cuda' in device:
             torch.backends.cudnn.benchmark = True
@@ -64,14 +74,16 @@ class FaceAlignment:
             network_name = '2DFAN-' + str(network_size)
         else:
             network_name = '3DFAN-' + str(network_size)
-        self.face_alignment_net = torch.jit.load(load_file_from_url(models_urls[network_name]))
+        self.face_alignment_net = torch.jit.load(
+            load_file_from_url(models_urls.get(pytorch_version, default_model_urls)[network_name]))
 
         self.face_alignment_net.to(device)
         self.face_alignment_net.eval()
 
         # Initialiase the depth prediciton network
         if landmarks_type == LandmarksType._3D:
-            self.depth_prediciton_net = torch.jit.load(load_file_from_url(models_urls['depth']))
+            self.depth_prediciton_net = torch.jit.load(
+                load_file_from_url(models_urls.get(pytorch_version, default_model_urls)['depth']))
 
             self.depth_prediciton_net.to(device)
             self.depth_prediciton_net.eval()
