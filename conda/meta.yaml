@@ -1,4 +1,4 @@
-{% set version = "1.0.1" %}
+{% set version = "1.3.1" %}
 
 package:
   name: face_alignment
@@ -24,6 +24,7 @@ requirements:
     - scipy
     - opencv
     - tqdm
+    - numba
 
 about:
   home: https://github.com/1adrianb/face-alignment

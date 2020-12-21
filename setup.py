@@ -42,6 +42,7 @@ requirements = [
     'scikit-image',
     'opencv-python',
     'tqdm',
+    'numba',
     'enum34;python_version<"3.4"'
 ]
 
@@ -55,12 +56,13 @@ setup(
 
     # Author details
     author="Adrian Bulat",
-    author_email="adrian.bulat@nottingham.ac.uk",
+    author_email="adrian@adrianbulat.com",
     url="https://github.com/1adrianb/face-alignment",
 
     # Package info
     packages=find_packages(exclude=('test',)),
 
+    python_requires='>=3',
     install_requires=requirements,
     license='BSD',
     zip_safe=True,
@@ -72,12 +74,12 @@ setup(
         'Natural Language :: English',
 
         # Supported python versions
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )

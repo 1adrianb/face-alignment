@@ -3,7 +3,6 @@ import glob
 from tqdm import tqdm
 import numpy as np
 import torch
-import cv2
 from skimage import io
 
 
@@ -39,6 +38,27 @@ class FaceDetector(object):
         Arguments:
             tensor_or_path {numpy.ndarray, torch.tensor or string} -- the path
             to an image or the image itself.
+
+        Example::
+
+            >>> path_to_image = 'data/image_01.jpg'
+            ...   detected_faces = detect_from_image(path_to_image)
+            [A list of bounding boxes (x1, y1, x2, y2)]
+            >>> image = cv2.imread(path_to_image)
+            ...   detected_faces = detect_from_image(image)
+            [A list of bounding boxes (x1, y1, x2, y2)]
+
+        """
+        raise NotImplementedError
+
+    def detect_from_batch(self, tensor):
+        """Detects faces in a given image.
+
+        This function detects the faces present in a provided BGR(usually)
+        image. The input can be either the image itself or the path to it.
+
+        Arguments:
+            tensor {torch.tensor} -- image batch tensor.
 
         Example::
 
@@ -114,18 +134,17 @@ class FaceDetector(object):
         raise NotImplementedError
 
     @staticmethod
-    def tensor_or_path_to_ndarray(tensor_or_path, rgb=True):
+    def tensor_or_path_to_ndarray(tensor_or_path):
         """Convert path (represented as a string) or torch.tensor to a numpy.ndarray
 
         Arguments:
             tensor_or_path {numpy.ndarray, torch.tensor or string} -- path to the image, or the image itself
         """
         if isinstance(tensor_or_path, str):
-            return cv2.imread(tensor_or_path) if not rgb else io.imread(tensor_or_path)
+            return io.imread(tensor_or_path)
         elif torch.is_tensor(tensor_or_path):
-            # Call cpu in case its coming from cuda
-            return tensor_or_path.cpu().numpy()[..., ::-1].copy() if not rgb else tensor_or_path.cpu().numpy()
+            return tensor_or_path.cpu().numpy()
         elif isinstance(tensor_or_path, np.ndarray):
-            return tensor_or_path[..., ::-1].copy() if not rgb else tensor_or_path
+            return tensor_or_path
         else:
             raise TypeError

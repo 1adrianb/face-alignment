@@ -11,7 +11,7 @@ Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning 
 For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment) [![Anaconda-Server Badge](https://anaconda.org/1adrianb/face_alignment/badges/version.svg)](https://anaconda.org/1adrianb/face_alignment)
-[![PyPI](https://img.shields.io/pypi/v/nine.svg?style=flat-square)](https://pypi.org/project/face-alignment/)
+[![PyPI version](https://badge.fury.io/py/face-alignment.svg)](https://pypi.org/project/face-alignment/)
 
 ## Features
 
@@ -60,7 +60,7 @@ preds = fa.get_landmarks_from_directory('../test/assets/')
 
 #### Detect the landmarks using a specific face detector.
 
-By default the package will use the SFD face detector. However the users can alternatively use dlib or pre-existing ground truth bounding boxes.
+By default the package will use the SFD face detector. However the users can alternatively use dlib, BlazeFace, or pre-existing ground truth bounding boxes.
 
 ```python
 import face_alignment
@@ -85,9 +85,9 @@ Please also see the ``examples`` folder
 
 ### Requirements
 
-* Python 3.5+ or Python 2.7 (it may work with other versions too)
+* Python 3.5+ (it may work with other versions too). Last version with support for python 2.7 was v1.1.1
 * Linux, Windows or macOS
-* pytorch (>=1.0)
+* pytorch (>=1.5)
 
 While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
 
@@ -104,39 +104,7 @@ Alternatively, bellow, you can find instruction to build it from source.
 
 ### From source
 
- Install pytorch and pytorch dependencies. Instructions taken from [pytorch readme](https://github.com/pytorch/pytorch). For a more updated version check the framework github page.
-
- On Linux
-```bash
-export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" # [anaconda root directory]
-
-# Install basic dependencies
-conda install numpy pyyaml mkl setuptools cmake gcc cffi
-
-# Add LAPACK support for the GPU
-conda install -c soumith magma-cuda80 # or magma-cuda75 if CUDA 7.5
-```
-
-On OSX
-```bash
-export CMAKE_PREFIX_PATH=[anaconda root directory]
-conda install numpy pyyaml setuptools cmake cffi
-```
-#### Get the PyTorch source
-```bash
-git clone --recursive https://github.com/pytorch/pytorch
-```
-
-#### Install PyTorch
-On Linux
-```bash
-python setup.py install
-```
-
-On OSX
-```bash
-MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ python setup.py install
-```
+ Install pytorch and pytorch dependencies. Please check the [pytorch readme](https://github.com/pytorch/pytorch) for this.
 
 #### Get the Face Alignment source code
 ```bash
@@ -150,7 +118,7 @@ python setup.py install
 
 ### Docker image
 
-A Dockerfile is provided to build images with cuda support and cudnn v5. For more instructions about running and building a docker image check the orginal Docker documentation.
+A Dockerfile is provided to build images with cuda support and cudnn. For more instructions about running and building a docker image check the orginal Docker documentation.
 ```
 docker build -t face-alignment .
 ```
@@ -161,7 +129,7 @@ While here the work is presented as a black-box, if you want to know more about 
 
 ## Contributions
 
-All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue.
+All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue. If you plan to add a new features please open an issue to discuss this prior to making a pull request.
 
 ## Citation
 
