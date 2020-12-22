@@ -2,6 +2,7 @@ import torch
 from enum import IntEnum
 from skimage import io
 import numpy as np
+from distutils.version import LooseVersion
 
 from .utils import *
 
@@ -53,6 +54,9 @@ class FaceAlignment:
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         self.verbose = verbose
+
+        if LooseVersion(torch.__version__) < LooseVersion('1.5.0'):
+            raise ImportError(f'Unsupported pytorch version detected. Minimum supported version of pytorch: 1.5.0')
 
         network_size = int(network_size)
         pytorch_version = torch.__version__
