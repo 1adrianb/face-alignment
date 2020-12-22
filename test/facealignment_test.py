@@ -100,6 +100,22 @@ class Tester(unittest.TestCase):
         for pred, reference in zip(preds, reference_data):
             self.assertTrue(np.allclose(pred, reference))
 
+    def test_predict_points_from_dir(self):
+        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
+
+        reference_data = {
+            'test/assets/grass.jpg': None,
+            'test/assets/aflw-test.jpg': self.reference_data}
+
+        preds = fa.get_landmarks_from_directory('test/assests/')
+
+        for k, points in preds.items():
+            if isinstance(points, list):
+                for p, p_reference in zip(points, reference_data[k]):
+                    self.assertTrue(np.allclose(p, p_reference))
+            else:
+                self.assertEqual(points, reference_data[k])
+
 
 if __name__ == '__main__':
     unittest.main()
