@@ -1,6 +1,5 @@
 import math
 import numpy as np
-from numba import jit
 
 
 def nms(dets, thresh):
@@ -51,7 +50,6 @@ def encode(matched, priors, variances):
     return np.concatenate([g_cxcy, g_wh], 1)  # [num_priors,4]
 
 
-@jit(nopython=True)
 def decode(loc, priors, variances):
     """Decode locations from predictions using priors to undo
     the encoding we did for offset regression at train time.

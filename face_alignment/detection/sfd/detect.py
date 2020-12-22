@@ -3,8 +3,6 @@ import torch.nn.functional as F
 
 import cv2
 import numpy as np
-from numba import jit
-from numba.typed import List
 
 from .bbox import *
 
@@ -42,11 +40,10 @@ def batch_detect(net, img_batch, device):
 
     olist = [oelem.data.cpu().numpy() for oelem in olist]
 
-    bboxlists = get_predictions(List(olist), batch_size)
+    bboxlists = get_predictions(olist, batch_size)
     return bboxlists
 
 
-@jit(nopython=True)
 def get_predictions(olist, batch_size):
     bboxlists = []
     variances = [0.1, 0.2]
