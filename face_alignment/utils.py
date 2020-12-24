@@ -72,7 +72,7 @@ def draw_gaussian(image, point, sigma):
 def transform(point, center, scale, resolution, invert=False):
     """Generate and affine transformation matrix.
 
-    Given a set of points, a center, a scale and a targer resolution, the
+    Given a set of points, a center, a scale and a target resolution, the
     function generates and affine transformation matrix. If invert is ``True``
     it will produce the inverse transformation.
 
@@ -149,7 +149,7 @@ def crop(image, center, scale, resolution=256.0):
 def transform_np(point, center, scale, resolution, invert=False):
     """Generate and affine transformation matrix.
 
-    Given a set of points, a center, a scale and a targer resolution, the
+    Given a set of points, a center, a scale and a target resolution, the
     function generates and affine transformation matrix. If invert is ``True``
     it will produce the inverse transformation.
 
