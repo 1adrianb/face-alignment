@@ -5,8 +5,15 @@ from skimage import io
 import collections
 
 
+# Optionally set detector and some additional detector parameters
+face_detector = 'sfd'
+face_detector_kwargs = {
+    "filter_threshold" : 0.8
+}
+
 # Run the 3D face alignment on a test image, without CUDA.
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu', flip_input=True)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu', flip_input=True,
+                                  face_detector=face_detector, face_detector_kwargs=face_detector_kwargs)
 
 try:
     input_img = io.imread('../test/assets/aflw-test.jpg')

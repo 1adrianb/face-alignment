@@ -16,7 +16,7 @@ class SFDDetector(FaceDetector):
     '''SF3D Detector.
     '''
 
-    def __init__(self, device, path_to_detector=None, verbose=False):
+    def __init__(self, device, path_to_detector=None, verbose=False, filter_threshold=0.5):
         super(SFDDetector, self).__init__(device, verbose)
 
         # Initialise the face detector
@@ -25,16 +25,17 @@ class SFDDetector(FaceDetector):
         else:
             model_weights = torch.load(path_to_detector)
 
+        self.fiter_threshold = filter_threshold
         self.face_detector = s3fd()
         self.face_detector.load_state_dict(model_weights)
         self.face_detector.to(device)
         self.face_detector.eval()
 
-    def _filter_bboxes(self, bboxlist, threshold=0.5):
+    def _filter_bboxes(self, bboxlist):
         if len(bboxlist) > 0:
             keep = nms(bboxlist, 0.3)
             bboxlist = bboxlist[keep, :]
-            bboxlist = [x for x in bboxlist if x[-1] > threshold]
+            bboxlist = [x for x in bboxlist if x[-1] > self.fiter_threshold]
 
         return bboxlist
 

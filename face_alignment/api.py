@@ -49,7 +49,7 @@ models_urls = {
 
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
-                 device='cuda', flip_input=False, face_detector='sfd', verbose=False):
+                 device='cuda', flip_input=False, face_detector='sfd', face_detector_kwargs=None, verbose=False):
         self.device = device
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
@@ -72,7 +72,8 @@ class FaceAlignment:
         # Get the face detector
         face_detector_module = __import__('face_alignment.detection.' + face_detector,
                                           globals(), locals(), [face_detector], 0)
-        self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose)
+        face_detector_kwargs = face_detector_kwargs or {}
+        self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose, **face_detector_kwargs)
 
         # Initialise the face alignemnt networks
         if landmarks_type == LandmarksType._2D:
