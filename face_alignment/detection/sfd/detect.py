@@ -12,7 +12,7 @@ def detect(net, img, device):
     # Creates a batch of 1
     img = np.expand_dims(img, 0)
 
-    img = torch.from_numpy(img).to(device, dtype=torch.float32)
+    img = torch.from_numpy(img.copy()).to(device, dtype=torch.float32)
 
     return batch_detect(net, img, device)
 
