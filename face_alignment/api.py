@@ -169,7 +169,7 @@ class FaceAlignment:
 
             landmarks.append(pts_img.numpy())
 
-        return landmarks
+        return detected_faces,landmarks
 
     @torch.no_grad()
     def get_landmarks_from_batch(self, image_batch, detected_faces=None):
