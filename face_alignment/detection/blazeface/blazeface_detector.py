@@ -14,7 +14,7 @@ models_urls = {
 
 class BlazeFaceDetector(FaceDetector):
     def __init__(self, device, path_to_detector=None, path_to_anchor=None, verbose=False,
-                 min_score_thresh = 0.5, min_suppression_threshold = 0.3):
+                 min_score_thresh=0.5, min_suppression_threshold=0.3):
         super(BlazeFaceDetector, self).__init__(device, verbose)
 
         # Initialise the face detector

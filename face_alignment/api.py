@@ -94,20 +94,21 @@ class FaceAlignment:
             self.depth_prediciton_net.to(device)
             self.depth_prediciton_net.eval()
 
-    def get_landmarks(self, image_or_path, detected_faces=None):
+    def get_landmarks(self, image_or_path, detected_faces=None, return_bboxes=False):
         """Deprecated, please use get_landmarks_from_image
 
         Arguments:
-            image_or_path {string or numpy.array or torch.tensor} -- The input image or path to it.
+            image_or_path {string or numpy.array or torch.tensor} -- The input image or path to it
 
         Keyword Arguments:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
             in the image (default: {None})
+            return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
         """
-        return self.get_landmarks_from_image(image_or_path, detected_faces)
+        return self.get_landmarks_from_image(image_or_path, detected_faces, return_bboxes)
 
     @torch.no_grad()
-    def get_landmarks_from_image(self, image_or_path, detected_faces=None):
+    def get_landmarks_from_image(self, image_or_path, detected_faces=None, return_bboxes=False):
         """Predict the landmarks for each face present in the image.
 
         This function predicts a set of 68 2D or 3D images, one for each image present.
@@ -119,6 +120,7 @@ class FaceAlignment:
         Keyword Arguments:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
             in the image (default: {None})
+            return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
         """
         image = get_image(image_or_path)
 
@@ -169,10 +171,13 @@ class FaceAlignment:
 
             landmarks.append(pts_img.numpy())
 
-        return landmarks
+        if return_bboxes:
+            return landmarks, detected_faces
+        else:
+            return landmarks
 
     @torch.no_grad()
-    def get_landmarks_from_batch(self, image_batch, detected_faces=None):
+    def get_landmarks_from_batch(self, image_batch, detected_faces=None, return_bboxes=False):
         """Predict the landmarks for each face present in the image.
 
         This function predicts a set of 68 2D or 3D images, one for each image in a batch in parallel.
@@ -184,6 +189,7 @@ class FaceAlignment:
         Keyword Arguments:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
             in the image (default: {None})
+            return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
         """
 
         if detected_faces is None:
@@ -206,9 +212,23 @@ class FaceAlignment:
             else:
                 landmark_set = []
             landmarks.append(landmark_set)
-        return landmarks
+        if return_bboxes:
+            return landmarks, detected_faces
+        else:
+            return landmarks
 
     def get_landmarks_from_directory(self, path, extensions=['.jpg', '.png'], recursive=True, show_progress_bar=True):
+        """Scan a directory for images with a given extension type(s) and predict the landmarks for each
+            face present in the images found.
+
+         Arguments:
+            path {str} -- path to the target directory containing the images
+
+        Keyword Arguments:
+            extensions {list of str} -- list containing the image extensions considered (default: ['.jpg', '.png'])
+            recursive {boolean} -- If True, scans for images recursively (default: True)
+            show_progress_bar {boolean} -- If True displays a progress bar (default: True)
+        """
         detected_faces = self.face_detector.detect_from_directory(path, extensions, recursive, show_progress_bar)
 
         predictions = {}
