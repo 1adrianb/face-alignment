@@ -1,4 +1,5 @@
 import torch
+import warnings
 from enum import IntEnum
 from skimage import io
 import numpy as np
@@ -128,7 +129,7 @@ class FaceAlignment:
             detected_faces = self.face_detector.detect_from_image(image.copy())
 
         if len(detected_faces) == 0:
-            print("Warning: No faces were detected.")
+            warnings.warn("No faces were detected.")
             return None
 
         landmarks = []
@@ -196,7 +197,7 @@ class FaceAlignment:
             detected_faces = self.face_detector.detect_from_batch(image_batch)
 
         if len(detected_faces) == 0:
-            print("Warning: No faces were detected.")
+            warnings.warn("No faces were detected.")
             return None
 
         landmarks = []
