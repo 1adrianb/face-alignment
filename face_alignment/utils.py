@@ -195,10 +195,12 @@ def get_preds_fromhm(hm, center=None, scale=None):
         scale {float} -- face scale (default: {None})
     """
     B, C, H, W = hm.shape
-    idx = np.argmax(hm.reshape(B, C, H * W), axis=2)
+    hm_reshape = hm.reshape(B, C, H * W)
+    idx = np.argmax(hm_reshape, axis=-1)
+    scores = np.take_along_axis(hm_reshape, np.expand_dims(idx, axis=-1), axis=-1).squeeze(-1)
     preds, preds_orig = _get_preds_fromhm(hm, idx, center, scale)
 
-    return preds, preds_orig
+    return preds, preds_orig, scores
 
 
 @jit(nopython=True)
