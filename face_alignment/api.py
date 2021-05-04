@@ -95,7 +95,7 @@ class FaceAlignment:
             self.depth_prediciton_net.to(device)
             self.depth_prediciton_net.eval()
 
-    def get_landmarks(self, image_or_path, detected_faces=None, return_bboxes=False):
+    def get_landmarks(self, image_or_path, detected_faces=None, return_bboxes=False, return_landmark_score=False):
         """Deprecated, please use get_landmarks_from_image
 
         Arguments:
@@ -105,11 +105,13 @@ class FaceAlignment:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
             in the image (default: {None})
             return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
+            return_landmark_score {boolean} -- If True, return the keypoint scores along with the keypoints.
         """
-        return self.get_landmarks_from_image(image_or_path, detected_faces, return_bboxes)
+        return self.get_landmarks_from_image(image_or_path, detected_faces, return_bboxes, return_landmark_score)
 
     @torch.no_grad()
-    def get_landmarks_from_image(self, image_or_path, detected_faces=None, return_bboxes=False):
+    def get_landmarks_from_image(self, image_or_path, detected_faces=None, return_bboxes=False,
+                                 return_landmark_score=False):
         """Predict the landmarks for each face present in the image.
 
         This function predicts a set of 68 2D or 3D images, one for each image present.
@@ -122,6 +124,16 @@ class FaceAlignment:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
             in the image (default: {None})
             return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
+            return_landmark_score {boolean} -- If True, return the keypoint scores along with the keypoints.
+
+        Return:
+            result:
+                1. if both return_bboxes and return_landmark_score are False, result will be:
+                    landmark
+                2. Otherwise, result will be one of the following, depending on the actual value of return_* arguments.
+                    (landmark, landmark_score, detected_face)
+                    (landmark, None,           detected_face)
+                    (landmark, landmark_score, None         )
         """
         image = get_image(image_or_path)
 
@@ -133,6 +145,7 @@ class FaceAlignment:
             return None
 
         landmarks = []
+        landmarks_scores = []
         for i, d in enumerate(detected_faces):
             center = torch.tensor(
                 [d[2] - (d[2] - d[0]) / 2.0, d[3] - (d[3] - d[1]) / 2.0])
@@ -151,9 +164,10 @@ class FaceAlignment:
                 out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)
             out = out.cpu().numpy()
 
-            pts, pts_img = get_preds_fromhm(out, center.numpy(), scale)
+            pts, pts_img, scores = get_preds_fromhm(out, center.numpy(), scale)
             pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
             pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
+            scores = scores.squeeze(0)
 
             if self.landmarks_type == LandmarksType._3D:
                 heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
@@ -171,14 +185,20 @@ class FaceAlignment:
                     (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
 
             landmarks.append(pts_img.numpy())
+            landmarks_scores.append(scores)
 
-        if return_bboxes:
-            return landmarks, detected_faces
+        if not return_bboxes:
+            detected_faces = None
+        if not return_landmark_score:
+            landmarks_scores = None
+        if return_bboxes or return_landmark_score:
+            return landmarks, landmarks_scores, detected_faces
         else:
             return landmarks
 
     @torch.no_grad()
-    def get_landmarks_from_batch(self, image_batch, detected_faces=None, return_bboxes=False):
+    def get_landmarks_from_batch(self, image_batch, detected_faces=None, return_bboxes=False,
+                                 return_landmark_score=False):
         """Predict the landmarks for each face present in the image.
 
         This function predicts a set of 68 2D or 3D images, one for each image in a batch in parallel.
@@ -191,6 +211,16 @@ class FaceAlignment:
             detected_faces {list of numpy.array} -- list of bounding boxes, one for each face found
             in the image (default: {None})
             return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
+            return_landmark_score {boolean} -- If True, return the keypoint scores along with the keypoints.
+
+        Return:
+            result:
+                1. if both return_bboxes and return_landmark_score are False, result will be:
+                    landmarks
+                2. Otherwise, result will be one of the following, depending on the actual value of return_* arguments.
+                    (landmark, landmark_score, detected_face)
+                    (landmark, None,           detected_face)
+                    (landmark, landmark_score, None         )
         """
 
         if detected_faces is None:
@@ -201,20 +231,32 @@ class FaceAlignment:
             return None
 
         landmarks = []
+        landmarks_scores_list = []
         # A batch for each frame
         for i, faces in enumerate(detected_faces):
-            landmark_set = self.get_landmarks_from_image(
+            res = self.get_landmarks_from_image(
                 image_batch[i].cpu().numpy().transpose(1, 2, 0),
-                detected_faces=faces
+                detected_faces=faces,
+                return_landmark_score=return_landmark_score,
             )
+            if return_landmark_score:
+                landmark_set, landmarks_scores, _ = res
+                landmarks_scores_list.append(landmarks_scores)
+            else:
+                landmark_set = res
             # Bacward compatibility
             if landmark_set is not None:
                 landmark_set = np.concatenate(landmark_set, axis=0)
             else:
                 landmark_set = []
             landmarks.append(landmark_set)
-        if return_bboxes:
-            return landmarks, detected_faces
+
+        if not return_bboxes:
+            detected_faces = None
+        if not return_landmark_score:
+            landmarks_scores_list = None
+        if return_bboxes or return_landmark_score:
+            return landmarks, landmarks_scores_list, detected_faces
         else:
             return landmarks
 

@@ -30,7 +30,7 @@ class Tester(unittest.TestCase):
                 heatmaps[i] = draw_gaussian(heatmaps[i], pts[i], 2)
         heatmaps = np.expand_dims(heatmaps, axis=0)
 
-        preds, _ = get_preds_fromhm(heatmaps)
+        preds, _, _ = get_preds_fromhm(heatmaps)
 
         assert np.allclose(pts, preds, atol=5)
 
