@@ -142,7 +142,10 @@ class FaceAlignment:
 
         if len(detected_faces) == 0:
             warnings.warn("No faces were detected.")
-            return None
+            if return_bboxes or return_landmark_score:
+                return None, None, None
+            else:
+                return None
 
         landmarks = []
         landmarks_scores = []
@@ -228,7 +231,10 @@ class FaceAlignment:
 
         if len(detected_faces) == 0:
             warnings.warn("No faces were detected.")
-            return None
+            if return_bboxes or return_landmark_score:
+                return None, None, None
+            else:
+                return None
 
         landmarks = []
         landmarks_scores_list = []
@@ -260,7 +266,8 @@ class FaceAlignment:
         else:
             return landmarks
 
-    def get_landmarks_from_directory(self, path, extensions=['.jpg', '.png'], recursive=True, show_progress_bar=True):
+    def get_landmarks_from_directory(self, path, extensions=['.jpg', '.png'], recursive=True, show_progress_bar=True,
+                                     return_bboxes=False, return_landmark_score=False):
         """Scan a directory for images with a given extension type(s) and predict the landmarks for each
             face present in the images found.
 
@@ -271,13 +278,20 @@ class FaceAlignment:
             extensions {list of str} -- list containing the image extensions considered (default: ['.jpg', '.png'])
             recursive {boolean} -- If True, scans for images recursively (default: True)
             show_progress_bar {boolean} -- If True displays a progress bar (default: True)
+            return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
+            return_landmark_score {boolean} -- If True, return the keypoint scores along with the keypoints.
         """
         detected_faces = self.face_detector.detect_from_directory(path, extensions, recursive, show_progress_bar)
 
         predictions = {}
         for image_path, bounding_boxes in detected_faces.items():
             image = io.imread(image_path)
-            preds = self.get_landmarks_from_image(image, bounding_boxes)
-            predictions[image_path] = preds
+            if return_bboxes or return_landmark_score:
+                preds, bbox, score = self.get_landmarks_from_image(
+                    image, bounding_boxes, return_bboxes=return_bboxes, return_landmark_score=return_landmark_score)
+                predictions[image_path] = (preds, bbox, score)
+            else:
+                preds = self.get_landmarks_from_image(image, bounding_boxes)
+                predictions[image_path] = preds
 
         return predictions
