@@ -27,6 +27,7 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
