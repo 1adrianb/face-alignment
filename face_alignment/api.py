@@ -110,8 +110,7 @@ class FaceAlignment:
         return self.get_landmarks_from_image(image_or_path, detected_faces, return_bboxes, return_landmark_score)
 
     @torch.no_grad()
-    def get_landmarks_from_image(self, image_or_path, detected_faces=None, return_bboxes=False,
-                                 return_landmark_score=False):
+    def get_landmarks_from_image(self, image_or_path, detected_faces=None, return_bboxes=False, return_landmark_score=True):
         """Predict the landmarks for each face present in the image.
 
         This function predicts a set of 68 2D or 3D images, one for each image present.
