@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import globalVar as gl
+
 
 class L2Norm(nn.Module):
     def __init__(self, n_channels, scale=1.0):
@@ -67,62 +69,106 @@ class s3fd(nn.Module):
 
     def forward(self, x):
         h = F.relu(self.conv1_1(x), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv1_2(h), inplace=True)
+        gl.append0(h)
         h = F.max_pool2d(h, 2, 2)
-
+        gl.append0(h)
         h = F.relu(self.conv2_1(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv2_2(h), inplace=True)
+        gl.append0(h)
         h = F.max_pool2d(h, 2, 2)
-
+        gl.append0(h)
         h = F.relu(self.conv3_1(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv3_2(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv3_3(h), inplace=True)
+        gl.append0(h)
         f3_3 = h
         h = F.max_pool2d(h, 2, 2)
+        gl.append0(h)
 
         h = F.relu(self.conv4_1(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv4_2(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv4_3(h), inplace=True)
+        gl.append0(h)
         f4_3 = h
         h = F.max_pool2d(h, 2, 2)
-
+        gl.append0(h)
         h = F.relu(self.conv5_1(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv5_2(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv5_3(h), inplace=True)
+        gl.append0(h)
         f5_3 = h
         h = F.max_pool2d(h, 2, 2)
+        gl.append0(h)
 
         h = F.relu(self.fc6(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.fc7(h), inplace=True)
+        gl.append0(h)
         ffc7 = h
         h = F.relu(self.conv6_1(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv6_2(h), inplace=True)
+        gl.append0(h)
         f6_2 = h
         h = F.relu(self.conv7_1(h), inplace=True)
+        gl.append0(h)
         h = F.relu(self.conv7_2(h), inplace=True)
+        gl.append0(h)
         f7_2 = h
 
         f3_3 = self.conv3_3_norm(f3_3)
+        gl.append0(f3_3)
         f4_3 = self.conv4_3_norm(f4_3)
+        gl.append0(f4_3)
         f5_3 = self.conv5_3_norm(f5_3)
+        gl.append0(f5_3)
 
         cls1 = self.conv3_3_norm_mbox_conf(f3_3)
+        gl.append0(cls1)
         reg1 = self.conv3_3_norm_mbox_loc(f3_3)
+        gl.append0(reg1)
         cls2 = self.conv4_3_norm_mbox_conf(f4_3)
+        gl.append0(cls2)
         reg2 = self.conv4_3_norm_mbox_loc(f4_3)
+        gl.append0(reg2)
         cls3 = self.conv5_3_norm_mbox_conf(f5_3)
+        gl.append0(cls3)
         reg3 = self.conv5_3_norm_mbox_loc(f5_3)
+        gl.append0(reg3)
         cls4 = self.fc7_mbox_conf(ffc7)
+        gl.append0(cls4)
         reg4 = self.fc7_mbox_loc(ffc7)
+        gl.append0(reg4)
         cls5 = self.conv6_2_mbox_conf(f6_2)
+        gl.append0(cls5)
         reg5 = self.conv6_2_mbox_loc(f6_2)
+        gl.append0(reg5)
         cls6 = self.conv7_2_mbox_conf(f7_2)
+        gl.append0(cls6)
         reg6 = self.conv7_2_mbox_loc(f7_2)
+        gl.append0(reg6)
 
         # max-out background label
         chunk = torch.chunk(cls1, 4, 1)
+        gl.append0(chunk)
         bmax = torch.max(torch.max(chunk[0], chunk[1]), chunk[2])
+        gl.append0(bmax)
         cls1 = torch.cat([bmax, chunk[3]], dim=1)
+        gl.append0(cls1)
+
+        # # max-out background label
+        # chunk = torch.chunk(cls1, 4, 1)
+        # bmax = torch.max(torch.max(chunk[0], chunk[1]), chunk[2])
+        # cls1 = torch.cat([bmax, chunk[3]], dim=1)
 
         return [cls1, reg1, cls2, reg2, cls3, reg3, cls4, reg4, cls5, reg5, cls6, reg6]
 

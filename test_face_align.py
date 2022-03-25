@@ -1,4 +1,4 @@
-import face_alignment_of as face_alignment
+import face_alignment as face_alignment
 from skimage import io
 
 s = 'face_alignment.detection.sfd'
