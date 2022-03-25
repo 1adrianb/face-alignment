@@ -15,7 +15,7 @@ torch_model.load_state_dict(torch_parameters)
 for key, value in torch_parameters.items():
     val = value.detach().cpu().numpy()
     torch_parameters[key] = val
-    print("key:", key, "value.shape", val.shape)
+    # print("key:", key, "value.shape", val.shape)
 oneflow_model.load_state_dict(torch_parameters)
 oneflow.save(oneflow_model.state_dict(), oneflow_model_path)
 
