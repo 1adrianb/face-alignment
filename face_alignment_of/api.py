@@ -71,9 +71,10 @@ class FaceAlignment:
             torch.backends.cudnn.benchmark = True
 
         # Get the face detector
-        face_detector_module = __import__('face_alignment.detection.' + face_detector,
-                                          globals(), locals(), [face_detector], 0)
-        print('face_alignment.detection.' + face_detector)
+        # face_detector_module = __import__('face_alignment.detection.' + face_detector,
+        #                                   globals(), locals(), [face_detector], 0)
+        import face_alignment_of.detection.sfd as face_detector_module
+        # print('face_alignment.detection.' + face_detector)
         face_detector_kwargs = face_detector_kwargs or {}
         self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose, **face_detector_kwargs)
 
