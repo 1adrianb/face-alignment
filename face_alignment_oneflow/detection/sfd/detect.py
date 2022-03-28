@@ -1,5 +1,7 @@
-import torch
-import torch.nn.functional as F
+# import torch
+# import torch.nn.functional as F
+import oneflow as torch
+import oneflow.nn.functional as F
 
 import cv2
 import numpy as np

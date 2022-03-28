@@ -1,5 +1,4 @@
-import torch
-from torch.utils.model_zoo import load_url
+import oneflow as torch
 
 from ..core import FaceDetector
 
@@ -8,8 +7,9 @@ from .bbox import nms
 from .detect import detect, batch_detect
 
 models_urls = {
-    's3fd': 'https://www.adrianbulat.com/downloads/python-fan/s3fd-619a316812.pth',
+    's3fd': 'oneflow_model_hub/s3fd-619a316812',
 }
+
 
 
 class SFDDetector(FaceDetector):
@@ -21,7 +21,8 @@ class SFDDetector(FaceDetector):
 
         # Initialise the face detector
         if path_to_detector is None:
-            model_weights = load_url(models_urls['s3fd'])
+            model_weights = torch.load(models_urls['s3fd'])
+
         else:
             model_weights = torch.load(path_to_detector)
 

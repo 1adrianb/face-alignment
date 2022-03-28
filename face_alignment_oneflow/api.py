@@ -4,6 +4,8 @@ from enum import IntEnum
 from skimage import io
 import numpy as np
 from distutils.version import LooseVersion
+import onnxruntime
+import onnx
 
 from .utils import *
 
@@ -47,6 +49,10 @@ models_urls = {
     },
 }
 
+models_onnxs = {
+    '2DFAN-4': 'oneflow_model_hub/onnx/2DFAN4.onnx'
+}
+
 
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
@@ -61,19 +67,13 @@ class FaceAlignment:
         #                     Either upgrade (recommended) your pytorch setup, or downgrade to face-alignment 1.2.0')
 
         network_size = int(network_size)
-        pytorch_version = torch.__version__
-        if 'dev' in pytorch_version:
-            pytorch_version = pytorch_version.rsplit('.', 2)[0]
-        else:
-            pytorch_version = pytorch_version.rsplit('.', 1)[0] # 1.11
 
         if 'cuda' in device:
             torch.backends.cudnn.benchmark = True
 
         # Get the face detector
-        face_detector_module = __import__('face_alignment.detection.' + face_detector,
+        face_detector_module = __import__('face_alignment_oneflow.detection.' + face_detector,
                                           globals(), locals(), [face_detector], 0)
-        print('face_alignment.detection.' + face_detector)
         face_detector_kwargs = face_detector_kwargs or {}
         self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose, **face_detector_kwargs)
 
@@ -82,19 +82,23 @@ class FaceAlignment:
             network_name = '2DFAN-' + str(network_size)
         else:
             network_name = '3DFAN-' + str(network_size)
-        self.face_alignment_net = torch.jit.load(
-            load_file_from_url(models_urls.get(pytorch_version, default_model_urls)[network_name]))
 
-        self.face_alignment_net.to(device)
-        self.face_alignment_net.eval()
+        # check onnx
+        onnx_model = onnx.load(models_onnxs[network_name])
+        onnx.checker.check_model(onnx_model)
 
-        # Initialiase the depth prediciton network
-        if landmarks_type == LandmarksType._3D:
-            self.depth_prediciton_net = torch.jit.load(
-                load_file_from_url(models_urls.get(pytorch_version, default_model_urls)['depth']))
+        providers = ['CPUExecutionProvider']
+        self.face_alignment_net = onnxruntime.InferenceSession(models_onnxs[network_name], providers=providers)
+        # numpy_output = session.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: numpy_input})[0]
+        # self.face_alignment_net.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: numpy_input})[0]
 
-            self.depth_prediciton_net.to(device)
-            self.depth_prediciton_net.eval()
+        # # Initialiase the depth prediciton network
+        # if landmarks_type == LandmarksType._3D:
+        #     self.depth_prediciton_net = torch.jit.load(
+        #         load_file_from_url(models_urls.get(pytorch_version, default_model_urls)['depth']))
+        #
+        #     self.depth_prediciton_net.to(device)
+        #     self.depth_prediciton_net.eval()
 
     def get_landmarks(self, image_or_path, detected_faces=None, return_bboxes=False, return_landmark_score=False):
         """Deprecated, please use get_landmarks_from_image
@@ -157,36 +161,25 @@ class FaceAlignment:
             scale = (d[2] - d[0] + d[3] - d[1]) / self.face_detector.reference_scale
 
             inp = crop(image, center, scale)
-            inp = torch.from_numpy(inp.transpose(
-                (2, 0, 1))).float()
-
-            inp = inp.to(self.device)
-            inp.div_(255.0).unsqueeze_(0)
-
-            out = self.face_alignment_net(inp).detach()
+            inp = inp.transpose((2, 0, 1)).astype(np.float32)
+            # inp = torch.from_numpy(inp.transpose(
+            #     (2, 0, 1))).float()
+            #
+            # inp = inp.to(self.device)
+            inp/=255
+            inp = np.expand_dims(inp,0)
+            out = self.face_alignment_net.run([self.face_alignment_net.get_outputs()[0].name],{self.face_alignment_net.get_inputs()[0].name: inp})[0]
             if self.flip_input:
-                out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)
-            out = out.cpu().numpy()
+                out += flip(self.face_alignment_net.run([self.face_alignment_net.get_outputs()[0].name],{self.face_alignment_net.get_inputs()[0].name: flip(inp)})[0].detach(), is_label=True)
+
+            out = out.cpu().numpy() if isinstance(out,torch.Tensor) else out
 
             pts, pts_img, scores = get_preds_fromhm(out, center.numpy(), scale)
             pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
+
             pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
             scores = scores.squeeze(0)
 
-            if self.landmarks_type == LandmarksType._3D:
-                heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
-                for i in range(68):
-                    if pts[i, 0] > 0 and pts[i, 1] > 0:
-                        heatmaps[i] = draw_gaussian(
-                            heatmaps[i], pts[i], 2)
-                heatmaps = torch.from_numpy(
-                    heatmaps).unsqueeze_(0)
-
-                heatmaps = heatmaps.to(self.device)
-                depth_pred = self.depth_prediciton_net(
-                    torch.cat((inp, heatmaps), 1)).data.cpu().view(68, 1)
-                pts_img = torch.cat(
-                    (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
 
             landmarks.append(pts_img.numpy())
             landmarks_scores.append(scores)

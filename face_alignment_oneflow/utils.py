@@ -1,7 +1,3 @@
-import os
-import sys
-import errno
-import torch
 import math
 import numpy as np
 import cv2
@@ -9,13 +5,7 @@ from skimage import io
 from skimage import color
 from numba import jit
 
-from urllib.parse import urlparse
-from torch.hub import download_url_to_file, HASH_REGEX
-try:
-    from torch.hub import get_dir
-except BaseException:
-    from torch.hub import _get_torch_home as get_dir
-import oneflow
+import oneflow as torch
 
 gauss_kernel = None
 
@@ -99,9 +89,15 @@ def transform(point, center, scale, resolution, invert=False):
     t[1, 2] = resolution * (-center[1] / h + 0.5)
 
     if invert:
-        t = torch.inverse(t)
+        '''
+        tensor([[  0.6674,   0.0000, -27.0703],
+        [  0.0000,   0.6674, -19.7248],
+        [  0.0000,   0.0000,   1.0000]])
+        '''
+        t = torch.from_numpy(np.linalg.inv(t.numpy()))
+        # t = torch.inverse(t)
 
-    new_point = (torch.matmul(t, _pt))[0:2]
+    new_point = (torch.matmul(t, _pt[None].T).T).squeeze(0)[0:2]
 
     return new_point.int()
 
@@ -124,6 +120,8 @@ def crop(image, center, scale, resolution=256.0):
     ul = transform([1, 1], center, scale, resolution, True)
     br = transform([resolution, resolution], center, scale, resolution, True)
     # pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
+    if isinstance(ul, torch.Tensor) and isinstance(br, torch.Tensor):
+        ul,br = ul.numpy(),br.numpy()
     if image.ndim > 2:
         newDim = np.array([br[1] - ul[1], br[0] - ul[0],
                            image.shape[2]], dtype=np.int32)
@@ -312,7 +310,8 @@ def flip(tensor, is_label=False):
     Keyword Arguments:
         is_label {bool} -- [denote wherever the input is an image or a set of heatmaps ] (default: {False})
     """
-    if not torch.is_tensor(tensor):
+    is_tensor = torch.is_tensor(tensor)
+    if not is_tensor:
         tensor = torch.from_numpy(tensor)
 
     if is_label:
@@ -320,7 +319,7 @@ def flip(tensor, is_label=False):
     else:
         tensor = tensor.flip(tensor.ndimension() - 1)
 
-    return tensor
+    return tensor if is_tensor else tensor.detach().cpu().numpy()
 
 
 def get_image(image_or_path):
@@ -348,33 +347,33 @@ def get_image(image_or_path):
     return image
 
 
-# Pytorch load supports only pytorch models
-def load_file_from_url(url, model_dir=None, progress=True, check_hash=False, file_name=None):
-    if model_dir is None:
-        hub_dir = get_dir()
-        model_dir = os.path.join(hub_dir, 'checkpoints')
-
-    try:
-        os.makedirs(model_dir)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            # Directory already exists, ignore.
-            pass
-        else:
-            # Unexpected OSError, re-raise.
-            raise
-
-    parts = urlparse(url)
-    filename = os.path.basename(parts.path)
-    if file_name is not None:
-        filename = file_name
-    cached_file = os.path.join(model_dir, filename)
-    if not os.path.exists(cached_file):
-        sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))
-        hash_prefix = None
-        if check_hash:
-            r = HASH_REGEX.search(filename)  # r is Optional[Match[str]]
-            hash_prefix = r.group(1) if r else None
-        download_url_to_file(url, cached_file, hash_prefix, progress=progress)
-
-    return cached_file
+# # Pytorch load supports only pytorch models
+# def load_file_from_url(url, model_dir=None, progress=True, check_hash=False, file_name=None):
+#     if model_dir is None:
+#         hub_dir = get_dir()
+#         model_dir = os.path.join(hub_dir, 'checkpoints')
+#
+#     try:
+#         os.makedirs(model_dir)
+#     except OSError as e:
+#         if e.errno == errno.EEXIST:
+#             # Directory already exists, ignore.
+#             pass
+#         else:
+#             # Unexpected OSError, re-raise.
+#             raise
+#
+#     parts = urlparse(url)
+#     filename = os.path.basename(parts.path)
+#     if file_name is not None:
+#         filename = file_name
+#     cached_file = os.path.join(model_dir, filename)
+#     if not os.path.exists(cached_file):
+#         sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))
+#         hash_prefix = None
+#         if check_hash:
+#             r = HASH_REGEX.search(filename)  # r is Optional[Match[str]]
+#             hash_prefix = r.group(1) if r else None
+#         download_url_to_file(url, cached_file, hash_prefix, progress=progress)
+#
+#     return cached_file
