@@ -16,9 +16,9 @@ class LandmarksType(IntEnum):
     ``_3D`` - detect the points ``(x,y,z)``` in a 3D space
 
     """
-    _2D = 1
-    _2halfD = 2
-    _3D = 3
+    TWO_D = 1
+    TWO_HALF_D = 2
+    THREE_D = 3
 
 
 class NetworkSize(IntEnum):
@@ -77,7 +77,7 @@ class FaceAlignment:
         self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose, **face_detector_kwargs)
 
         # Initialise the face alignemnt networks
-        if landmarks_type == LandmarksType._2D:
+        if landmarks_type == LandmarksType.TWO_D:
             network_name = '2DFAN-' + str(network_size)
         else:
             network_name = '3DFAN-' + str(network_size)
@@ -88,7 +88,7 @@ class FaceAlignment:
         self.face_alignment_net.eval()
 
         # Initialiase the depth prediciton network
-        if landmarks_type == LandmarksType._3D:
+        if landmarks_type == LandmarksType.THREE_D:
             self.depth_prediciton_net = torch.jit.load(
                 load_file_from_url(models_urls.get(pytorch_version, default_model_urls)['depth']))
 
@@ -172,7 +172,7 @@ class FaceAlignment:
             pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
             scores = scores.squeeze(0)
 
-            if self.landmarks_type == LandmarksType._3D:
+            if self.landmarks_type == LandmarksType.THREE_D:
                 heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
                 for i in range(68):
                     if pts[i, 0] > 0 and pts[i, 1] > 0:
