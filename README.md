@@ -25,7 +25,7 @@ For numerical evaluations it is highly recommended to use the lua version which 
 import face_alignment
 from skimage import io
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
 
 input = io.imread('../test/assets/aflw-test.jpg')
 preds = fa.get_landmarks(input)
@@ -41,7 +41,7 @@ preds = fa.get_landmarks(input)
 import face_alignment
 from skimage import io
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, flip_input=False)
 
 input = io.imread('../test/assets/aflw-test.jpg')
 preds = fa.get_landmarks(input)
@@ -53,7 +53,7 @@ preds = fa.get_landmarks(input)
 import face_alignment
 from skimage import io
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
 
 preds = fa.get_landmarks_from_directory('../test/assets/')
 ```
@@ -66,7 +66,7 @@ By default the package will use the SFD face detector. However the users can alt
 import face_alignment
 
 # sfd for SFD, dlib for Dlib and folder for existing bounding boxes.
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detector='sfd')
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, face_detector='sfd')
 ```
 
 #### Running on CPU/GPU
@@ -76,7 +76,7 @@ In order to specify the device (GPU or CPU) on which the code will run one can e
 import face_alignment
 
 # cuda for CUDA
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cpu')
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, device='cpu')
 ```
 
 Please also see the ``examples`` folder
