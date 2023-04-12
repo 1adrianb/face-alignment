@@ -3,7 +3,7 @@ import warnings
 from enum import IntEnum
 from skimage import io
 import numpy as np
-from distutils.version import LooseVersion
+from packaging import version
 
 from .utils import *
 
@@ -56,7 +56,7 @@ class FaceAlignment:
         self.landmarks_type = landmarks_type
         self.verbose = verbose
 
-        if LooseVersion(torch.__version__) < LooseVersion('1.5.0'):
+        if version.parse(torch.__version__) < version.parse('1.5.0'):
             raise ImportError(f'Unsupported pytorch version detected. Minimum supported version of pytorch: 1.5.0\
                             Either upgrade (recommended) your pytorch setup, or downgrade to face-alignment 1.2.0')
 
