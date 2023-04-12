@@ -79,14 +79,14 @@ class Tester(unittest.TestCase):
                                          [206., 303., 47.13894]], dtype=np.float32)]
 
     def test_predict_points(self):
-        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
+        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, device='cpu')
         preds = fa.get_landmarks('test/assets/aflw-test.jpg')
         self.assertEqual(len(preds), len(self.reference_data))
         for pred, reference in zip(preds, self.reference_data):
             self.assertTrue(np.allclose(pred, reference))
 
     def test_predict_batch_points(self):
-        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
+        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, device='cpu')
 
         reference_data = self.reference_data + self.reference_data
         reference_data.append([])
@@ -101,7 +101,7 @@ class Tester(unittest.TestCase):
             self.assertTrue(np.allclose(pred, reference))
 
     def test_predict_points_from_dir(self):
-        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu')
+        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, device='cpu')
 
         reference_data = {
             'test/assets/grass.jpg': None,

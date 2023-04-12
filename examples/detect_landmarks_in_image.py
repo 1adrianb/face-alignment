@@ -12,7 +12,7 @@ face_detector_kwargs = {
 }
 
 # Run the 3D face alignment on a test image, without CUDA.
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, device='cpu', flip_input=True,
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, device='cpu', flip_input=True,
                                   face_detector=face_detector, face_detector_kwargs=face_detector_kwargs)
 
 try:
