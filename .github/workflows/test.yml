@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7]
-        pytorch-version: [1.5.1, 1.6.0, 1.7.1, nightly]
+        python-version: [3.8]
+        pytorch-version: [1.7.1, 1.11.0, 1.13.1, nightly]
     
     steps:
       - uses: actions/checkout@v2
