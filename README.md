@@ -81,6 +81,24 @@ fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cp
 
 Please also see the ``examples`` folder
 
+#### Supported face detectors
+
+```python
+
+# dlib
+model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='dlib')
+
+# SFD
+model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='sfd')
+
+# Blazeface (front camera model)
+model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='blazeface')
+
+# Blazeface (back camera model)
+model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='blazeface', face_detector_kwargs={'back_model': True})
+
+```
+
 ## Installation
 
 ### Requirements

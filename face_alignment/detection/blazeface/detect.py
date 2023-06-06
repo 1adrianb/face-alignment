@@ -7,10 +7,10 @@ import numpy as np
 from .utils import *
 
 
-def detect(net, img, device):
+def detect(net, img, target_size=128, device='cuda'):
     H, W, C = img.shape
     orig_size = min(H, W)
-    img, (xshift, yshift) = resize_and_crop_image(img, 128)
+    img, (xshift, yshift) = resize_and_crop_image(img, target_size)
     preds = net.predict_on_image(img)
 
     if 0 == len(preds):
@@ -25,10 +25,12 @@ def detect(net, img, device):
     return [np.concatenate((locs * orig_size + shift, scores), axis=1)]
 
 
-def batch_detect(net, img_batch, device):
+def batch_detect(net, img_batch, target_size=128, device='cuda'):
     """
     Inputs:
+        - net: BlazeFace model
         - img_batch: a numpy array or tensor of shape (Batch size, Channels, Height, Width)
+        - target_size: target size of the input image
     Outputs:
         - list of 2-dim numpy arrays with shape (faces_on_this_image, 5): x1, y1, x2, y2, confidence
           (x1, y1) - top left corner, (x2, y2) - bottom right corner
@@ -41,7 +43,7 @@ def batch_detect(net, img_batch, device):
 
     img_batch = img_batch.transpose((0, 2, 3, 1))
 
-    imgs, (xshift, yshift) = resize_and_crop_batch(img_batch, 128)
+    imgs, (xshift, yshift) = resize_and_crop_batch(img_batch, target_size)
     preds = net.predict_on_batch(imgs)
     bboxlists = []
     for pred in preds:
