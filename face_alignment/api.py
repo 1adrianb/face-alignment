@@ -11,9 +11,9 @@ from .utils import *
 class LandmarksType(IntEnum):
     """Enum class defining the type of landmarks to detect.
 
-    ``_2D`` - the detected points ``(x,y)`` are detected in a 2D space and follow the visible contour of the face
-    ``_2halfD`` - this points represent the projection of the 3D points into 3D
-    ``_3D`` - detect the points ``(x,y,z)``` in a 3D space
+    ``TWO_D`` - the detected points ``(x,y)`` are detected in a 2D space and follow the visible contour of the face
+    ``TWO_HALF_D`` - this points represent the projection of the 3D points into 3D
+    ``THREE_D`` - detect the points ``(x,y,z)``` in a 3D space
 
     """
     TWO_D = 1
