@@ -73,10 +73,14 @@ fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detec
 In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag:
 
 ```python
+import torch
 import face_alignment
 
-# cuda for CUDA
+# cuda for CUDA, mps for Apple M1/2 GPUs.
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cpu')
+
+# running using lower precision
+fa = fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, dtype=torch.bfloat16, device='cuda')
 ```
 
 Please also see the ``examples`` folder
@@ -85,10 +89,10 @@ Please also see the ``examples`` folder
 
 ```python
 
-# dlib
+# dlib (fast, may miss faces)
 model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='dlib')
 
-# SFD
+# SFD (likely best results, but slowest)
 model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='sfd')
 
 # Blazeface (front camera model)
