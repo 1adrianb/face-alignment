@@ -4,8 +4,10 @@ from enum import IntEnum
 from skimage import io
 import numpy as np
 from packaging import version
+from tqdm import tqdm
 
 from .utils import *
+from .folder_data import FolderData
 
 
 class LandmarksType(IntEnum):
@@ -282,11 +284,13 @@ class FaceAlignment:
             return_bboxes {boolean} -- If True, return the face bounding boxes in addition to the keypoints.
             return_landmark_score {boolean} -- If True, return the keypoint scores along with the keypoints.
         """
-        detected_faces = self.face_detector.detect_from_directory(path, extensions, recursive, show_progress_bar)
-
+        dataset = FolderData(path, self.face_detector.tensor_or_path_to_ndarray, extensions, recursive, self.verbose)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=2, prefetch_factor=4)
+      
         predictions = {}
-        for image_path, bounding_boxes in detected_faces.items():
-            image = io.imread(image_path)
+        for (image_path, image) in tqdm(dataloader, disable=not show_progress_bar):
+            image_path, image = image_path[0], image[0]
+            bounding_boxes = self.face_detector.detect_from_image(image)
             if return_bboxes or return_landmark_score:
                 preds, bbox, score = self.get_landmarks_from_image(
                     image, bounding_boxes, return_bboxes=return_bboxes, return_landmark_score=return_landmark_score)

@@ -107,7 +107,7 @@ class Tester(unittest.TestCase):
             'test/assets/grass.jpg': None,
             'test/assets/aflw-test.jpg': self.reference_data}
 
-        preds = fa.get_landmarks_from_directory('test/assests/')
+        preds = fa.get_landmarks_from_directory('test/assets/')
 
         for k, points in preds.items():
             if isinstance(points, list):
