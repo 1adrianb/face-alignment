@@ -47,24 +47,22 @@ def batch_detect(net, img_batch, device):
 def get_predictions(olist, batch_size):
     bboxlists = []
     variances = [0.1, 0.2]
-    for j in range(batch_size):
-        bboxlist = []
-        for i in range(len(olist) // 2):
-            ocls, oreg = olist[i * 2], olist[i * 2 + 1]
-            stride = 2**(i + 2)    # 4,8,16,32,64,128
-            poss = zip(*np.where(ocls[:, 1, :, :] > 0.05))
-            for Iindex, hindex, windex in poss:
-                axc, ayc = stride / 2 + windex * stride, stride / 2 + hindex * stride
-                score = ocls[j, 1, hindex, windex]
-                loc = oreg[j, :, hindex, windex].copy().reshape(1, 4)
-                priors = np.array([[axc / 1.0, ayc / 1.0, stride * 4 / 1.0, stride * 4 / 1.0]])
-                box = decode(loc, priors, variances)
-                x1, y1, x2, y2 = box[0]
-                bboxlist.append([x1, y1, x2, y2, score])
-
-        bboxlists.append(bboxlist)
-
-    bboxlists = np.array(bboxlists)
+    for i in range(len(olist) // 2):
+        ocls, oreg = olist[i * 2], olist[i * 2 + 1]
+        stride = 2**(i + 2)    # 4,8,16,32,64,128
+        poss = zip(*np.where(ocls[:, 1, :, :] > 0.05))
+        for Iindex, hindex, windex in poss:
+            axc, ayc = stride / 2 + windex * stride, stride / 2 + hindex * stride
+            priors = np.array([[axc / 1.0, ayc / 1.0, stride * 4 / 1.0, stride * 4 / 1.0]])
+            score = ocls[:, 1, hindex, windex][:,None]
+            loc = oreg[:, :, hindex, windex].copy()
+            boxes = decode(loc, priors, variances)
+            bboxlists.append(np.concatenate((boxes, score), axis=1))
+    
+    if len(bboxlists) == 0: # No candidates within given threshold
+        bboxlists = np.array([[] for _ in range(batch_size)])
+    else:
+        bboxlists = np.stack(bboxlists, axis=1)
     return bboxlists
 
 
