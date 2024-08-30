@@ -153,7 +153,7 @@ class FaceAlignment:
         landmarks = []
         landmarks_scores = []
         for i, d in enumerate(detected_faces):
-            center = torch.tensor(
+            center = np.array(
                 [d[2] - (d[2] - d[0]) / 2.0, d[3] - (d[3] - d[1]) / 2.0])
             center[1] = center[1] - (d[3] - d[1]) * 0.12
             scale = (d[2] - d[0] + d[3] - d[1]) / self.face_detector.reference_scale
@@ -170,7 +170,7 @@ class FaceAlignment:
                 out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)
             out = out.to(device='cpu', dtype=torch.float32).numpy()
 
-            pts, pts_img, scores = get_preds_fromhm(out, center.numpy(), scale)
+            pts, pts_img, scores = get_preds_fromhm(out, center, scale)
             pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
             pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
             scores = scores.squeeze(0)
