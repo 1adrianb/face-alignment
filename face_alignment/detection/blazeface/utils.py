@@ -35,7 +35,10 @@ def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
 
 
 def resize_and_crop_image(image, dim):
-    if image.shape[0] > image.shape[1]:
+    if image.shape[0] == image.shape[1]:
+        img = cv2.resize(image, (dim, dim))
+        return img, (0, 0)
+    elif image.shape[0] > image.shape[1]:
         img = image_resize(image, width=dim)
         yshift, xshift = (image.shape[0] - image.shape[1]) // 2, 0
         y_start = (img.shape[0] - img.shape[1]) // 2
