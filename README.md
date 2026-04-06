@@ -100,17 +100,18 @@ fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detec
 ```
 
 #### Running on CPU/GPU
-In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag:
+In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag.
+The landmark network is compiled with `torch.compile` by default for faster inference. Compilation artifacts are cached to disk, so only the first run is slow (~25s). Pass `compile=False` to disable.
 
 ```python
 import torch
 import face_alignment
 
 # cuda for CUDA, mps for Apple M GPUs.
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cpu')
-
-# running using lower precision
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, dtype=torch.bfloat16, device='cuda')
+
+# Skip compilation for instant startup
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cpu', compile=False)
 ```
 
 Please also see the ``examples`` folder

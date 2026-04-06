@@ -1,13 +1,57 @@
+import os
+import logging
 import torch
 import warnings
 from enum import IntEnum
-from skimage import io
 import numpy as np
-from packaging import version
 from tqdm import tqdm
 
 from .utils import *
+from .models import FAN, ResNetDepth
 from .folder_data import FolderData
+
+logger = logging.getLogger(__name__)
+
+COMPILE_CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache', 'face_alignment', 'compile')
+
+
+def _compile_cache_path(landmarks_type, network_size, device, dtype):
+    """Return the path to the cached compile artifacts."""
+    device_str = device if isinstance(device, str) else str(device)
+    device_str = device_str.split(':')[0]
+    dtype_str = str(dtype).replace('torch.', '')
+    lm_str = '3d' if landmarks_type == 3 else '2d'
+    key = f'{lm_str}_fan{network_size}_{device_str}_{dtype_str}'
+    return os.path.join(COMPILE_CACHE_DIR, f'{key}.bin')
+
+
+def _load_compile_cache(cache_path):
+    """Load cached compile artifacts if available."""
+    if not os.path.exists(cache_path):
+        return False
+    try:
+        with open(cache_path, 'rb') as f:
+            artifact_bytes = f.read()
+        torch.compiler.load_cache_artifacts(artifact_bytes)
+        logger.info('Loaded compile cache from %s', cache_path)
+        return True
+    except Exception as e:
+        logger.warning('Failed to load compile cache (%s), recompiling', e)
+        return False
+
+
+def _save_compile_cache(cache_path):
+    """Save compile artifacts to disk."""
+    try:
+        artifacts = torch.compiler.save_cache_artifacts()
+        if artifacts is not None:
+            artifact_bytes, _ = artifacts
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+            with open(cache_path, 'wb') as f:
+                f.write(artifact_bytes)
+            logger.info('Saved compile cache to %s', cache_path)
+    except Exception as e:
+        logger.warning('Failed to save compile cache: %s', e)
 
 
 class LandmarksType(IntEnum):
@@ -30,45 +74,24 @@ class NetworkSize(IntEnum):
     LARGE = 4
 
 
-default_model_urls = {
-    '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4-cd938726ad.zip',
-    '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4-4a694010b9.zip',
-    'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth-6c4283c0e0.zip',
-}
-
 models_urls = {
-    '1.6': {
-        '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4_1.6-c827573f02.zip',
-        '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4_1.6-ec5cf40a1d.zip',
-        'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth_1.6-2aa3f18772.zip',
-    },
-    '1.5': {
-        '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4_1.5-a60332318a.zip',
-        '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4_1.5-176570af4d.zip',
-        'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth_1.5-bc10f98e39.zip',
-    },
+    '2DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/2DFAN4-11f355bf06.pth.tar',
+    '3DFAN-4': 'https://www.adrianbulat.com/downloads/python-fan/3DFAN4-7835d9f11d.pth.tar',
+    'depth': 'https://www.adrianbulat.com/downloads/python-fan/depth-2a464da4ea.pth.tar',
 }
 
 
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
-                 device='cuda', dtype=torch.float32, flip_input=False, face_detector='sfd', face_detector_kwargs=None, verbose=False):
+                 device='cuda', dtype=torch.float32, flip_input=False, face_detector='sfd',
+                 face_detector_kwargs=None, verbose=False, compile=True):
         self.device = device
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         self.verbose = verbose
         self.dtype = dtype
 
-        if version.parse(torch.__version__) < version.parse('1.5.0'):
-            raise ImportError(f'Unsupported pytorch version detected. Minimum supported version of pytorch: 1.5.0\
-                            Either upgrade (recommended) your pytorch setup, or downgrade to face-alignment 1.2.0')
-
         network_size = int(network_size)
-        pytorch_version = torch.__version__
-        if 'dev' in pytorch_version:
-            pytorch_version = pytorch_version.rsplit('.', 2)[0]
-        else:
-            pytorch_version = pytorch_version.rsplit('.', 1)[0]
 
         if 'cuda' in device:
             torch.backends.cudnn.benchmark = True
@@ -79,24 +102,68 @@ class FaceAlignment:
         face_detector_kwargs = face_detector_kwargs or {}
         self.face_detector = face_detector_module.FaceDetector(device=device, verbose=verbose, **face_detector_kwargs)
 
-        # Initialise the face alignemnt networks
+        # Initialise the face alignment networks
         if landmarks_type == LandmarksType.TWO_D:
             network_name = '2DFAN-' + str(network_size)
         else:
             network_name = '3DFAN-' + str(network_size)
-        self.face_alignment_net = torch.jit.load(
-            load_file_from_url(models_urls.get(pytorch_version, default_model_urls)[network_name]))
 
-        self.face_alignment_net.to(device, dtype=dtype)
-        self.face_alignment_net.eval()
+        self.face_alignment_net = self._load_native(network_name, network_size, device, dtype)
 
-        # Initialiase the depth prediciton network
+        # Initialise the depth prediction network
         if landmarks_type == LandmarksType.THREE_D:
-            self.depth_prediciton_net = torch.jit.load(
-                load_file_from_url(models_urls.get(pytorch_version, default_model_urls)['depth']))
+            self.depth_prediciton_net = self._load_native_depth(device, dtype)
 
-            self.depth_prediciton_net.to(device, dtype=dtype)
-            self.depth_prediciton_net.eval()
+        # Apply torch.compile for faster inference
+        if compile:
+            try:
+                cache_path = _compile_cache_path(landmarks_type, network_size, device, dtype)
+                cache_hit = _load_compile_cache(cache_path)
+
+                self.face_alignment_net = torch.compile(self.face_alignment_net)
+                if landmarks_type == LandmarksType.THREE_D:
+                    self.depth_prediciton_net = torch.compile(self.depth_prediciton_net)
+
+                if not cache_hit:
+                    # Warm up to trigger compilation, then save cache
+                    warnings.warn(
+                        'Compiling face alignment model (one-time cost). '
+                        'Subsequent runs will be faster.')
+                    sample = torch.randn(1, 3, CROP_RESOLUTION, CROP_RESOLUTION,
+                                         device=device, dtype=dtype)
+                    self.face_alignment_net(sample)
+                    if landmarks_type == LandmarksType.THREE_D:
+                        sample_depth = torch.randn(1, 3 + NUM_LANDMARKS,
+                                                   CROP_RESOLUTION, CROP_RESOLUTION,
+                                                   device=device, dtype=dtype)
+                        self.depth_prediciton_net(sample_depth)
+                    _save_compile_cache(cache_path)
+            except Exception as e:
+                logger.warning('torch.compile failed (%s), using eager mode', e)
+
+    def _load_native(self, network_name, network_size, device, dtype):
+        """Load FAN model with native PyTorch (no compilation)."""
+        net = FAN(network_size)
+        fan_weights = torch.load(
+            load_file_from_url(models_urls[network_name]),
+            map_location=device, weights_only=True)
+        net.load_state_dict(fan_weights)
+        net.to(device, dtype=dtype)
+        net.eval()
+        return net
+
+    def _load_native_depth(self, device, dtype):
+        """Load depth model with native PyTorch (no compilation)."""
+        net = ResNetDepth()
+        depth_weights = torch.load(
+            load_file_from_url(models_urls['depth']),
+            map_location=device, weights_only=False)
+        depth_dict = {k.replace('module.', ''): v
+                      for k, v in depth_weights['state_dict'].items()}
+        net.load_state_dict(depth_dict)
+        net.to(device, dtype=dtype)
+        net.eval()
+        return net
 
     def get_landmarks(self, image_or_path, detected_faces=None, return_bboxes=False, return_landmark_score=False):
         """Deprecated, please use get_landmarks_from_image
@@ -165,9 +232,15 @@ class FaceAlignment:
             inp = inp.to(self.device, dtype=self.dtype)
             inp.div_(255.0).unsqueeze_(0)
 
-            out = self.face_alignment_net(inp).detach()
+            out = self.face_alignment_net(inp)
+            if isinstance(out, list):
+                out = out[-1]
+            out = out.detach()
             if self.flip_input:
-                out += flip(self.face_alignment_net(flip(inp)).detach(), is_label=True)
+                flip_out = self.face_alignment_net(flip(inp))
+                if isinstance(flip_out, list):
+                    flip_out = flip_out[-1]
+                out += flip(flip_out.detach(), is_label=True)
             out = out.to(device='cpu', dtype=torch.float32).numpy()
 
             pts, pts_img, scores = get_preds_fromhm(out, center, scale)
