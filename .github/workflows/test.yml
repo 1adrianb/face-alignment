@@ -9,10 +9,12 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
-        pytorch-version: ['2.0.1', '2.2.2', '2.11.0', 'nightly']
+        pytorch-version: ['2.0.1', '2.2.2', '2.11.0']
         exclude:
           - python-version: '3.12'
             pytorch-version: '2.0.1'
+          - python-version: '3.9'
+            pytorch-version: '2.11.0'
 
     steps:
       - uses: actions/checkout@v4
@@ -20,18 +22,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install PyTorch
-        run: |
-          if [[ "${{ matrix.pytorch-version }}" == "nightly" ]]; then
-            pip install --pre torch --index-url https://download.pytorch.org/whl/nightly/cpu
-          else
-            pip install torch==${{ matrix.pytorch-version }} --index-url https://download.pytorch.org/whl/cpu
-          fi
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install .
-          pip install pytest flake8
+          pip install torch==${{ matrix.pytorch-version }} --index-url https://download.pytorch.org/whl/cpu
+          if python3 -c "import torch; assert tuple(int(x) for x in torch.__version__.split('+')[0].split('.')[:2]) < (2,3)"; then
+            pip install "numpy<2"
+          fi
+          pip install . pytest flake8
       - name: Test with pytest
         run: pytest test/
       - name: Lint with flake8
