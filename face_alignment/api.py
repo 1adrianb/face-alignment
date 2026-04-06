@@ -155,7 +155,7 @@ class FaceAlignment:
         for i, d in enumerate(detected_faces):
             center = np.array(
                 [d[2] - (d[2] - d[0]) / 2.0, d[3] - (d[3] - d[1]) / 2.0])
-            center[1] = center[1] - (d[3] - d[1]) * 0.12
+            center[1] = center[1] - (d[3] - d[1]) * CENTER_Y_OFFSET
             scale = (d[2] - d[0] + d[3] - d[1]) / self.face_detector.reference_scale
 
             inp = crop(image, center, scale)
@@ -172,12 +172,12 @@ class FaceAlignment:
 
             pts, pts_img, scores = get_preds_fromhm(out, center, scale)
             pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
-            pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
+            pts, pts_img = pts.view(NUM_LANDMARKS, 2) * 4, pts_img.view(NUM_LANDMARKS, 2)
             scores = scores.squeeze(0)
 
             if self.landmarks_type == LandmarksType.THREE_D:
-                heatmaps = np.zeros((68, 256, 256), dtype=np.float32)
-                for i in range(68):
+                heatmaps = np.zeros((NUM_LANDMARKS, CROP_RESOLUTION, CROP_RESOLUTION), dtype=np.float32)
+                for i in range(NUM_LANDMARKS):
                     if pts[i, 0] > 0 and pts[i, 1] > 0:
                         heatmaps[i] = draw_gaussian(
                             heatmaps[i], pts[i], 2)
@@ -186,9 +186,9 @@ class FaceAlignment:
 
                 heatmaps = heatmaps.to(self.device, dtype=self.dtype)
                 depth_pred = self.depth_prediciton_net(
-                    torch.cat((inp, heatmaps), 1)).data.cpu().view(68, 1).to(dtype=torch.float32)
+                    torch.cat((inp, heatmaps), 1)).data.cpu().view(NUM_LANDMARKS, 1).to(dtype=torch.float32)
                 pts_img = torch.cat(
-                    (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
+                    (pts_img, depth_pred * (1.0 / (CROP_RESOLUTION / (SCALE_FACTOR * scale)))), 1)
 
             landmarks.append(pts_img.numpy())
             landmarks_scores.append(scores)

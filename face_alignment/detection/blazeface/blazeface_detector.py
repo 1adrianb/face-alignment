@@ -1,4 +1,5 @@
-from torch.utils.model_zoo import load_url
+import numpy as np
+from torch.hub import load_state_dict_from_url
 
 from ..core import FaceDetector
 from ...utils import load_file_from_url
@@ -23,13 +24,13 @@ class BlazeFaceDetector(FaceDetector):
         self.back_model = back_model
         if path_to_detector is None:
             if back_model:
-                model_weights = load_url(models_urls['blazeface_back_weights'])
+                model_weights = load_state_dict_from_url(models_urls['blazeface_back_weights'])
                 model_anchors = np.load(load_file_from_url(models_urls['blazeface_back_anchors']))
             else:
-                model_weights = load_url(models_urls['blazeface_weights'])
+                model_weights = load_state_dict_from_url(models_urls['blazeface_weights'])
                 model_anchors = np.load(load_file_from_url(models_urls['blazeface_anchors']))
         else:
-            model_weights = torch.load(path_to_detector)
+            model_weights = torch.load(path_to_detector, weights_only=True)
             model_anchors = np.load(path_to_anchor)
 
         self.face_detector = BlazeFace(back_model=back_model)
@@ -55,15 +56,3 @@ class BlazeFaceDetector(FaceDetector):
         image_size = 256 if self.back_model else 128
         bboxlists = batch_detect(self.face_detector, tensor, target_size=image_size, device=self.device)
         return bboxlists
-
-    @property
-    def reference_scale(self):
-        return 195
-
-    @property
-    def reference_x_shift(self):
-        return 0
-
-    @property
-    def reference_y_shift(self):
-        return 0

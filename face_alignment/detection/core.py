@@ -1,9 +1,33 @@
 import logging
 import glob
 from tqdm import tqdm
+import cv2
 import numpy as np
 import torch
 from skimage import io
+
+from ..utils import REFERENCE_SCALE
+
+
+def flip_detect(net, img, device, detect_fn):
+    """Run detection on a horizontally flipped image and mirror the results back."""
+    img = cv2.flip(img, 1)
+    b = detect_fn(net, img, device)
+
+    bboxlist = np.zeros(b.shape)
+    bboxlist[:, 0] = img.shape[1] - b[:, 2]
+    bboxlist[:, 1] = b[:, 1]
+    bboxlist[:, 2] = img.shape[1] - b[:, 0]
+    bboxlist[:, 3] = b[:, 3]
+    bboxlist[:, 4] = b[:, 4]
+    return bboxlist
+
+
+def pts_to_bb(pts):
+    """Convert a set of points to a bounding box [min_x, min_y, max_x, max_y]."""
+    min_x, min_y = np.min(pts, axis=0)
+    max_x, max_y = np.max(pts, axis=0)
+    return np.array([min_x, min_y, max_x, max_y])
 
 
 class FaceDetector(object):
@@ -123,15 +147,15 @@ class FaceDetector(object):
 
     @property
     def reference_scale(self):
-        raise NotImplementedError
+        return REFERENCE_SCALE
 
     @property
     def reference_x_shift(self):
-        raise NotImplementedError
+        return 0
 
     @property
     def reference_y_shift(self):
-        raise NotImplementedError
+        return 0
 
     @staticmethod
     def tensor_or_path_to_ndarray(tensor_or_path):

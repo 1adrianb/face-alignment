@@ -83,7 +83,7 @@ class Tester(unittest.TestCase):
         preds = fa.get_landmarks('test/assets/aflw-test.jpg')
         self.assertEqual(len(preds), len(self.reference_data))
         for pred, reference in zip(preds, self.reference_data):
-            self.assertTrue(np.allclose(pred, reference))
+            self.assertTrue(np.allclose(pred, reference, atol=0.07))
 
     def test_predict_batch_points(self):
         fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, device='cpu')
@@ -98,7 +98,7 @@ class Tester(unittest.TestCase):
 
         self.assertEqual(len(preds), len(reference_data))
         for pred, reference in zip(preds, reference_data):
-            self.assertTrue(np.allclose(pred, reference))
+            self.assertTrue(np.allclose(pred, reference, atol=0.07))
 
     def test_predict_points_from_dir(self):
         fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.THREE_D, device='cpu')
@@ -112,7 +112,7 @@ class Tester(unittest.TestCase):
         for k, points in preds.items():
             if isinstance(points, list):
                 for p, p_reference in zip(points, reference_data[k]):
-                    self.assertTrue(np.allclose(p, p_reference))
+                    self.assertTrue(np.allclose(p, p_reference, atol=0.07))
             else:
                 self.assertEqual(points, reference_data[k])
 

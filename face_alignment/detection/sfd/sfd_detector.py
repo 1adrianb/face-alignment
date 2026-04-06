@@ -1,5 +1,5 @@
 import torch
-from torch.utils.model_zoo import load_url
+from torch.hub import load_state_dict_from_url
 
 from ..core import FaceDetector
 
@@ -21,11 +21,11 @@ class SFDDetector(FaceDetector):
 
         # Initialise the face detector
         if path_to_detector is None:
-            model_weights = load_url(models_urls['s3fd'])
+            model_weights = load_state_dict_from_url(models_urls['s3fd'])
         else:
-            model_weights = torch.load(path_to_detector)
+            model_weights = torch.load(path_to_detector, weights_only=True)
 
-        self.fiter_threshold = filter_threshold
+        self.filter_threshold = filter_threshold
         self.face_detector = s3fd()
         self.face_detector.load_state_dict(model_weights)
         self.face_detector.to(device)
@@ -35,7 +35,7 @@ class SFDDetector(FaceDetector):
         if len(bboxlist) > 0:
             keep = nms(bboxlist, 0.3)
             bboxlist = bboxlist[keep, :]
-            bboxlist = [x for x in bboxlist if x[-1] > self.fiter_threshold]
+            bboxlist = [x for x in bboxlist if x[-1] > self.filter_threshold]
 
         return bboxlist
 
@@ -57,15 +57,3 @@ class SFDDetector(FaceDetector):
             new_bboxlists.append(bboxlist)
 
         return new_bboxlists
-
-    @property
-    def reference_scale(self):
-        return 195
-
-    @property
-    def reference_x_shift(self):
-        return 0
-
-    @property
-    def reference_y_shift(self):
-        return 0

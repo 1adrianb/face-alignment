@@ -1,10 +1,10 @@
 import torch
 import torch.nn.functional as F
 
-import cv2
 import numpy as np
 
 from .bbox import *
+from ..core import flip_detect as _flip_detect_base, pts_to_bb  # noqa: F401
 
 
 def detect(net, img, device):
@@ -58,7 +58,7 @@ def get_predictions(olist, batch_size):
             loc = oreg[:, :, hindex, windex].copy()
             boxes = decode(loc, priors, variances)
             bboxlists.append(np.concatenate((boxes, score), axis=1))
-    
+
     if len(bboxlists) == 0: # No candidates within given threshold
         bboxlists = np.array([[] for _ in range(batch_size)])
     else:
@@ -67,19 +67,4 @@ def get_predictions(olist, batch_size):
 
 
 def flip_detect(net, img, device):
-    img = cv2.flip(img, 1)
-    b = detect(net, img, device)
-
-    bboxlist = np.zeros(b.shape)
-    bboxlist[:, 0] = img.shape[1] - b[:, 2]
-    bboxlist[:, 1] = b[:, 1]
-    bboxlist[:, 2] = img.shape[1] - b[:, 0]
-    bboxlist[:, 3] = b[:, 3]
-    bboxlist[:, 4] = b[:, 4]
-    return bboxlist
-
-
-def pts_to_bb(pts):
-    min_x, min_y = np.min(pts, axis=0)
-    max_x, max_y = np.max(pts, axis=0)
-    return np.array([min_x, min_y, max_x, max_y])
+    return _flip_detect_base(net, img, device, detect)

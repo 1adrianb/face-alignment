@@ -29,9 +29,9 @@ class FolderDetector(FaceDetector):
         if os.path.isfile(base_name + '.npy'):
             detected_faces = np.load(base_name + '.npy')
         elif os.path.isfile(base_name + '.t7'):
-            detected_faces = torch.load(base_name + '.t7')
+            detected_faces = torch.load(base_name + '.t7', weights_only=True)
         elif os.path.isfile(base_name + '.pth'):
-            detected_faces = torch.load(base_name + '.pth')
+            detected_faces = torch.load(base_name + '.pth', weights_only=True)
         else:
             raise FileNotFoundError
 
@@ -39,15 +39,3 @@ class FolderDetector(FaceDetector):
             raise TypeError
 
         return detected_faces
-
-    @property
-    def reference_scale(self):
-        return 195
-
-    @property
-    def reference_x_shift(self):
-        return 0
-
-    @property
-    def reference_y_shift(self):
-        return 0

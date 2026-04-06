@@ -16,7 +16,7 @@ class Tester(unittest.TestCase):
         assert np.allclose(heatmaps.numpy(), flipped_heatmaps.numpy())
 
     def test_flip_is_image(self):
-        fake_image = torch.torch.rand(3, 256, 256)
+        fake_image = torch.rand(3, 256, 256)
         fliped_fake_image = flip(flip(fake_image.clone()))
 
         assert np.allclose(fake_image.numpy(), fliped_fake_image.numpy())
@@ -35,12 +35,11 @@ class Tester(unittest.TestCase):
         assert np.allclose(pts, preds, atol=5)
 
     def test_create_heatmaps(self):
-        reference_scale = 195
-        target_landmarks = torch.randint(0, 255, (1, 68, 2)).type(torch.float)  # simulated dataset
+        target_landmarks = torch.randint(0, 255, (1, NUM_LANDMARKS, 2)).type(torch.float)  # simulated dataset
         bb = create_bounding_box(target_landmarks)
         centers = torch.stack([bb[:, 2] - (bb[:, 2] - bb[:, 0]) / 2.0, bb[:, 3] - (bb[:, 3] - bb[:, 1]) / 2.0], dim=1)
-        centers[:, 1] = centers[:, 1] - (bb[:, 3] - bb[:, 1]) * 0.12  # Not sure where 0.12 comes from
-        scales = (bb[:, 2] - bb[:, 0] + bb[:, 3] - bb[:, 1]) / reference_scale
+        centers[:, 1] = centers[:, 1] - (bb[:, 3] - bb[:, 1]) * CENTER_Y_OFFSET
+        scales = (bb[:, 2] - bb[:, 0] + bb[:, 3] - bb[:, 1]) / REFERENCE_SCALE
         heatmaps = create_target_heatmap(target_landmarks, centers, scales)
         preds = get_preds_fromhm(heatmaps.numpy(), centers.squeeze().numpy(), scales.squeeze().numpy())[1]
 

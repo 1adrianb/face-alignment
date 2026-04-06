@@ -34,15 +34,3 @@ class DlibDetector(FaceDetector):
             detected_faces = [[d.rect.left(), d.rect.top(), d.rect.right(), d.rect.bottom()] for d in detected_faces]
 
         return detected_faces
-
-    @property
-    def reference_scale(self):
-        return 195
-
-    @property
-    def reference_x_shift(self):
-        return 0
-
-    @property
-    def reference_y_shift(self):
-        return 0
