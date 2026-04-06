@@ -112,6 +112,9 @@ fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, dtype=torc
 
 # Skip compilation for instant startup
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cpu', compile=False)
+
+# Limit batch size for multi-face images on low-memory GPUs (default: 1)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cuda', max_batch_size=8)
 ```
 
 Please also see the ``examples`` folder

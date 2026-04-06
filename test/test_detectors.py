@@ -16,6 +16,7 @@ from face_alignment.utils import get_image
 
 
 TEST_IMAGE = 'test/assets/aflw-test.jpg'
+MULTI_FACE_IMAGE = 'test/assets/aflw-test-grid3x3.jpg'
 NO_FACE_IMAGE = 'test/assets/grass.jpg'
 
 
@@ -196,6 +197,43 @@ class TestSCRFDDetector(unittest.TestCase):
 
     def test_reference_scale(self):
         self.assertEqual(self.fa.face_detector.reference_scale, 165)
+
+
+class TestMultiFaceBatching(unittest.TestCase):
+    """Test batched landmark prediction on a multi-face image."""
+
+    def setUp(self):
+        self.fa = _skip_if_unavailable('sfd')
+
+    def test_detect_all_faces(self):
+        preds = self.fa.get_landmarks(MULTI_FACE_IMAGE)
+        self.assertEqual(len(preds), 9)
+        for pred in preds:
+            self.assertEqual(pred.shape, (68, 2))
+
+    def test_max_batch_size_chunking(self):
+        fa_chunked = face_alignment.FaceAlignment(
+            face_alignment.LandmarksType.TWO_D, device='cpu',
+            face_detector='sfd', compile=False, max_batch_size=4)
+        preds_chunked = fa_chunked.get_landmarks(MULTI_FACE_IMAGE)
+        self.assertEqual(len(preds_chunked), 9)
+
+        # Results should match the default (all-at-once) path
+        fa_full = face_alignment.FaceAlignment(
+            face_alignment.LandmarksType.TWO_D, device='cpu',
+            face_detector='sfd', compile=False, max_batch_size=64)
+        preds_full = fa_full.get_landmarks(MULTI_FACE_IMAGE)
+        self.assertEqual(len(preds_full), 9)
+
+        for chunked, full in zip(preds_chunked, preds_full):
+            self.assertTrue(np.allclose(chunked, full))
+
+    def test_max_batch_size_1(self):
+        fa = face_alignment.FaceAlignment(
+            face_alignment.LandmarksType.TWO_D, device='cpu',
+            face_detector='sfd', compile=False, max_batch_size=1)
+        preds = fa.get_landmarks(MULTI_FACE_IMAGE)
+        self.assertEqual(len(preds), 9)
 
 
 if __name__ == '__main__':
