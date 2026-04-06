@@ -60,13 +60,43 @@ preds = fa.get_landmarks_from_directory('../test/assets/')
 
 #### Detect the landmarks using a specific face detector.
 
-By default the package will use the SFD face detector. However the users can alternatively use dlib, BlazeFace, or pre-existing ground truth bounding boxes.
+By default the package will use the SFD face detector. Pass `face_detector` to switch:
 
 ```python
 import face_alignment
 
-# sfd for SFD, dlib for Dlib and folder for existing bounding boxes.
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detector='sfd')
+```
+
+#### Supported face detectors
+
+The library supports multiple face detection backends. SFD is the default and most accurate, but slower alternatives like BlazeFace, YuNet, or RetinaFace offer better speed. SCRFD requires the optional `onnxruntime` package (`pip install onnxruntime`).
+
+| Detector | `face_detector=` | CPU (ms) | MPS (ms) | PyTorch device |
+|---|---|---|---|---|
+| [**SFD**](https://arxiv.org/abs/1708.05237) | `'sfd'` | 138.8 | 33.1 | CPU / CUDA / MPS |
+| [**BlazeFace**](https://arxiv.org/abs/1907.05047) | `'blazeface'` | 10.9 | 8.2 | CPU / CUDA / MPS |
+| [**YuNet**](https://link.springer.com/article/10.1007/s11633-023-1423-y) | `'yunet'` | 5.6 | N/A | CPU only (OpenCV DNN) |
+| [**RetinaFace**](https://arxiv.org/abs/1905.00641) | `'retinaface'` | 25.2 | 15.5 | CPU / CUDA / MPS |
+| [**SCRFD**](https://arxiv.org/abs/2105.04714) | `'scrfd'` | 23.1 | N/A | CPU only (ONNX Runtime) |
+| **dlib** *(deprecated)* | `'dlib'` | — | — | CPU / CUDA |
+
+*Timings: detection only, median over 20 runs, single face 450x450 image, Apple M2.*
+
+You can also skip detection entirely by passing `face_detector='folder'`, which loads pre-computed bounding boxes from `.npy`, `.t7`, or `.pth` files matching each image filename. This is useful for evaluation with ground truth boxes.
+
+```python
+import face_alignment
+
+# BlazeFace back camera model (larger input, better for distant faces)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detector='blazeface',
+                                  face_detector_kwargs={'back_model': True})
+
+# SCRFD (requires: pip install onnxruntime)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detector='scrfd')
+
+# Use pre-computed bounding boxes from files alongside images
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, face_detector='folder')
 ```
 
 #### Running on CPU/GPU
@@ -76,40 +106,22 @@ In order to specify the device (GPU or CPU) on which the code will run one can e
 import torch
 import face_alignment
 
-# cuda for CUDA, mps for Apple M1/2 GPUs.
+# cuda for CUDA, mps for Apple M GPUs.
 fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, device='cpu')
 
 # running using lower precision
-fa = fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, dtype=torch.bfloat16, device='cuda')
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, dtype=torch.bfloat16, device='cuda')
 ```
 
 Please also see the ``examples`` folder
-
-#### Supported face detectors
-
-```python
-
-# dlib (fast, may miss faces)
-model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='dlib')
-
-# SFD (likely best results, but slowest)
-model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='sfd')
-
-# Blazeface (front camera model)
-model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='blazeface')
-
-# Blazeface (back camera model)
-model = FaceAlignment(landmarks_type= LandmarksType.TWO_D, face_detector='blazeface', face_detector_kwargs={'back_model': True})
-
-```
 
 ## Installation
 
 ### Requirements
 
-* Python 3.5+ (it may work with other versions too). Last version with support for python 2.7 was v1.1.1
+* Python 3.9+
 * Linux, Windows or macOS
-* pytorch (>=1.5)
+* PyTorch (>=2.0)
 
 While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
 
@@ -135,7 +147,7 @@ git clone https://github.com/1adrianb/face-alignment
 #### Install the Face Alignment lib
 ```bash
 pip install -r requirements.txt
-python setup.py install
+pip install .
 ```
 
 ### Docker image
