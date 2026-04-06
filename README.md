@@ -10,7 +10,7 @@ Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning 
 
 For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Test Face alignmnet](https://github.com/1adrianb/face-alignment/workflows/Test%20Face%20alignmnet/badge.svg)](https://github.com/1adrianb/face-alignment/actions?query=workflow%3A%22Test+Face+alignmnet%22) [![Anaconda-Server Badge](https://anaconda.org/1adrianb/face_alignment/badges/version.svg)](https://anaconda.org/1adrianb/face_alignment)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Test Face alignment](https://github.com/1adrianb/face-alignment/workflows/Test%20Face%20alignment/badge.svg)](https://github.com/1adrianb/face-alignment/actions?query=workflow%3A%22Test+Face+alignment%22)
 [![PyPI version](https://badge.fury.io/py/face-alignment.svg)](https://pypi.org/project/face-alignment/)
 
 ## Features
@@ -133,12 +133,11 @@ While not required, for optimal performance(especially for the detector) it is *
 
 The easiest way to install it is using either pip or conda:
 
-| **Using pip**                | **Using conda**                            |
-|------------------------------|--------------------------------------------|
-| `pip install face-alignment` | `conda install -c 1adrianb face_alignment` |
-|                              |                                            |
+```
+pip install face-alignment
+```
 
-Alternatively, bellow, you can find instruction to build it from source.
+Alternatively, you can build it from source.
 
 ### From source
 
