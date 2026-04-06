@@ -83,13 +83,14 @@ models_urls = {
 
 class FaceAlignment:
     def __init__(self, landmarks_type, network_size=NetworkSize.LARGE,
-                 device='cuda', dtype=torch.float32, flip_input=False, face_detector='sfd',
-                 face_detector_kwargs=None, verbose=False, compile=True):
+                 device='cuda', dtype=torch.float32, flip_input=True, face_detector='sfd',
+                 face_detector_kwargs=None, verbose=False, compile=True, max_batch_size=1):
         self.device = device
         self.flip_input = flip_input
         self.landmarks_type = landmarks_type
         self.verbose = verbose
         self.dtype = dtype
+        self.max_batch_size = max_batch_size
 
         network_size = int(network_size)
 
@@ -217,31 +218,44 @@ class FaceAlignment:
             else:
                 return None
 
-        landmarks = []
-        landmarks_scores = []
-        for i, d in enumerate(detected_faces):
+        # Precompute centers, scales, and crops for all faces
+        centers = []
+        scales = []
+        crops = []
+        for d in detected_faces:
             center = np.array(
                 [d[2] - (d[2] - d[0]) / 2.0, d[3] - (d[3] - d[1]) / 2.0])
             center[1] = center[1] - (d[3] - d[1]) * CENTER_Y_OFFSET
             scale = (d[2] - d[0] + d[3] - d[1]) / self.face_detector.reference_scale
+            centers.append(center)
+            scales.append(scale)
+            crops.append(crop(image, center, scale).transpose((2, 0, 1)).astype(np.float32) / 255.0)
 
-            inp = crop(image, center, scale)
-            inp = torch.from_numpy(inp.transpose(
-                (2, 0, 1))).float()
-
-            inp = inp.to(self.device, dtype=self.dtype)
-            inp.div_(255.0).unsqueeze_(0)
-
-            out = self.face_alignment_net(inp)
-            if isinstance(out, list):
-                out = out[-1]
-            out = out.detach()
+        # Batch FAN forward pass (chunked by max_batch_size)
+        all_crops = torch.from_numpy(np.stack(crops))
+        out_chunks = []
+        for start in range(0, len(crops), self.max_batch_size):
+            inp_chunk = all_crops[start:start + self.max_batch_size].to(self.device, dtype=self.dtype)
+            out_chunk = self.face_alignment_net(inp_chunk)
+            if isinstance(out_chunk, list):
+                out_chunk = out_chunk[-1]
+            out_chunk = out_chunk.detach()
             if self.flip_input:
-                flip_out = self.face_alignment_net(flip(inp))
+                flip_out = self.face_alignment_net(flip(inp_chunk))
                 if isinstance(flip_out, list):
                     flip_out = flip_out[-1]
-                out += flip(flip_out.detach(), is_label=True)
-            out = out.to(device='cpu', dtype=torch.float32).numpy()
+                out_chunk += flip(flip_out.detach(), is_label=True)
+            out_chunks.append(out_chunk)
+
+        out_batch = torch.cat(out_chunks, dim=0).to(device='cpu', dtype=torch.float32).numpy()
+        inp_batch = all_crops.to(self.device, dtype=self.dtype)
+
+        # Per-face postprocessing (each face has its own center/scale)
+        landmarks = []
+        landmarks_scores = []
+        for i in range(len(detected_faces)):
+            center, scale = centers[i], scales[i]
+            out = out_batch[i:i+1]
 
             pts, pts_img, scores = get_preds_fromhm(out, center, scale)
             pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
@@ -250,16 +264,17 @@ class FaceAlignment:
 
             if self.landmarks_type == LandmarksType.THREE_D:
                 heatmaps = np.zeros((NUM_LANDMARKS, CROP_RESOLUTION, CROP_RESOLUTION), dtype=np.float32)
-                for i in range(NUM_LANDMARKS):
-                    if pts[i, 0] > 0 and pts[i, 1] > 0:
-                        heatmaps[i] = draw_gaussian(
-                            heatmaps[i], pts[i], 2)
+                for j in range(NUM_LANDMARKS):
+                    if pts[j, 0] > 0 and pts[j, 1] > 0:
+                        heatmaps[j] = draw_gaussian(
+                            heatmaps[j], pts[j], 2)
                 heatmaps = torch.from_numpy(
                     heatmaps).unsqueeze_(0)
 
                 heatmaps = heatmaps.to(self.device, dtype=self.dtype)
+                depth_inp = torch.cat((inp_batch[i:i+1], heatmaps), 1)
                 depth_pred = self.depth_prediciton_net(
-                    torch.cat((inp, heatmaps), 1)).data.cpu().view(NUM_LANDMARKS, 1).to(dtype=torch.float32)
+                    depth_inp).data.cpu().view(NUM_LANDMARKS, 1).to(dtype=torch.float32)
                 pts_img = torch.cat(
                     (pts_img, depth_pred * (1.0 / (CROP_RESOLUTION / (SCALE_FACTOR * scale)))), 1)
 

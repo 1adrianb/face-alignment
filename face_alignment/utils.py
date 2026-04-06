@@ -119,20 +119,15 @@ def crop(image, center, scale, resolution=256.0):
 
     Keyword Arguments:
         resolution {float} -- the size of the output cropped image (default: {256.0})
-
-    Returns:
-        [type] -- [description]
-    """  # Crop around the center point
-    """ Crops the image around the center. Input is expected to be an np.ndarray """
+    """
     ul = transform([1, 1], center, scale, resolution, True)
     br = transform([resolution, resolution], center, scale, resolution, True)
-    # pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
     if image.ndim > 2:
         newDim = np.array([br[1] - ul[1], br[0] - ul[0],
                            image.shape[2]], dtype=np.int32)
         newImg = np.zeros(newDim, dtype=np.uint8)
     else:
-        newDim = np.array([br[1] - ul[1], br[0] - ul[0]], dtype=np.int)
+        newDim = np.array([br[1] - ul[1], br[0] - ul[0]], dtype=np.int32)
         newImg = np.zeros(newDim, dtype=np.uint8)
     ht = image.shape[0]
     wd = image.shape[1]
