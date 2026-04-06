@@ -25,10 +25,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch==${{ matrix.pytorch-version }} --index-url https://download.pytorch.org/whl/cpu
-          if python3 -c "import torch; assert tuple(int(x) for x in torch.__version__.split('+')[0].split('.')[:2]) < (2,3)"; then
-            pip install "numpy<2"
+          if [[ "${{ matrix.pytorch-version }}" == "2.0.1" || "${{ matrix.pytorch-version }}" == "2.2.2" ]]; then
+            echo "numpy<2" > /tmp/constraints.txt
+            pip install . pytest flake8 -c /tmp/constraints.txt
+          else
+            pip install . pytest flake8
           fi
-          pip install . pytest flake8
       - name: Test with pytest
         run: pytest test/
       - name: Lint with flake8

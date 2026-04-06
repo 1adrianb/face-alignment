@@ -255,7 +255,7 @@ class FaceAlignment:
         landmarks_scores = []
         for i in range(len(detected_faces)):
             center, scale = centers[i], scales[i]
-            out = out_batch[i:i+1]
+            out = out_batch[i:i + 1]
 
             pts, pts_img, scores = get_preds_fromhm(out, center, scale)
             pts, pts_img = torch.from_numpy(pts), torch.from_numpy(pts_img)
@@ -272,7 +272,7 @@ class FaceAlignment:
                     heatmaps).unsqueeze_(0)
 
                 heatmaps = heatmaps.to(self.device, dtype=self.dtype)
-                depth_inp = torch.cat((inp_batch[i:i+1], heatmaps), 1)
+                depth_inp = torch.cat((inp_batch[i:i + 1], heatmaps), 1)
                 depth_pred = self.depth_prediciton_net(
                     depth_inp).data.cpu().view(NUM_LANDMARKS, 1).to(dtype=torch.float32)
                 pts_img = torch.cat(
